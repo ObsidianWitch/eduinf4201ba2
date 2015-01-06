@@ -3,4 +3,4 @@ build/
 sud
 # Netkit
 *.disk
-netkit_lab/shared
+netkit_lab/shared/root
