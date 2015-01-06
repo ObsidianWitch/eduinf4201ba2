@@ -148,3 +148,33 @@ int recv_print(int sockfd) {
 
     return recv_size;
 }
+
+/**
+ * Receive a complete message by making multiple recv calls.
+ *
+ * @param sockfd
+ * @return message on success, NULL otherwise
+*/
+char* recv(int sockfd) {
+	int total_recv_size = 0;
+    int recv_size;
+    char *buf = malloc(BUFFER_LEN);
+
+    do {
+        recv_size = read(sockfd, buf + total_recv_size,
+        	BUFFER_LEN - total_recv_size - 1);
+        if (recv_size == -1) {
+            perror("read");
+            return NULL;
+        }
+
+        if (recv_size != 0) {
+            buf[recv_size] = '\0';
+            printf("%s", buf);
+        }
+        
+        total_recv_size += recv_size;
+    } while(recv_size != 0);
+
+    return buf;
+}
