@@ -8,8 +8,8 @@ une base pour implementer les horloges logique/vectorielle/scalaire, ou
 bien pour implementer l'algorithme d'exclusion mutuelle distribue'
 
 Syntaxe :
-         arg 1 : Numero du 1er port
-	 arg 2 et suivant : nom de chaque machine
+    arg 1 : Numero du 1er port
+	arg 2 et suivant : nom de chaque machine
 
 --------------------------------
 Exemple pour 3 site :
@@ -34,7 +34,6 @@ On fournit ensuite un exemple permettant
 2) lire le message envoye' sur cette socket
 3) il est alors possible de renvoyer un message a l'envoyeur ou autre si
 necessaire
-
 */
 
 #include <stdio.h>
@@ -51,15 +50,17 @@ int GetSitePos(int Nbsites, char *argv[]) ;
 void WaitSync(int socket);
 void SendSync(char *site, int Port);
 
-/*Identification de ma position dans la liste */
+/**
+ * Identification de ma position dans la liste
+ */
 int GetSitePos(int NbSites, char *argv[]) {
     char MySiteName[20];
     int MySitePos = -1;
     int i;
     gethostname(MySiteName, 20);
 
-    for (i=0;i<NbSites;i++) {
-            if (strcmp(MySiteName, argv[i+2]) == 0) {
+    for (i = 0 ; i < NbSites ; i++) {
+        if (strcmp(MySiteName, argv[i+2]) == 0) {
             MySitePos = i;
             //printf("L'indice de %s est %d\n",MySiteName,MySitePos);
             return MySitePos;
@@ -68,14 +69,16 @@ int GetSitePos(int NbSites, char *argv[]) {
 
     if (MySitePos == -1) {
         printf("Indice du Site courant non trouve' dans la liste\n");
-        exit(-1);
+        exit(EXIT_FAILURE);
     }
 
-    return (-1);
+    return -1;
 }
 
 
-/*Attente bloquante d'un msg de synchro sur la socket donne'e*/
+/**
+ * Attente bloquante d'un msg de synchro sur la socket donnée
+ */
 void WaitSync(int s_ecoute) {
     char texte[40];
     int l;
@@ -92,7 +95,9 @@ void WaitSync(int s_ecoute) {
     close(s_service);
 }
 
-/*Envoie d'un msg de synchro a la machine Site/Port*/
+/**
+ * Envoie d'un msg de synchro a la machine Site/Port
+ */
 void SendSync(char *Site, int Port) {
     struct hostent* hp;
     int s_emis;
@@ -103,13 +108,13 @@ void SendSync(char *Site, int Port) {
 
     if ( (s_emis=socket(AF_INET, SOCK_STREAM, 0)) == -1) {
         perror("SendSync : Creation socket");
-        exit(-1);
+        exit(EXIT_FAILURE);
     }
 
     hp = gethostbyname(Site);
     if (hp == NULL) {
         perror("SendSync: Gethostbyname");
-        exit(-1);
+        exit(EXIT_FAILURE);
     }
 
     size_sock = sizeof(struct sockaddr_in);
@@ -119,7 +124,7 @@ void SendSync(char *Site, int Port) {
 
     if (connect(s_emis, (struct sockaddr*) &sock_add_emis, size_sock) == -1) {
         perror("SendSync : Connect");
-        exit(-1);
+        exit(EXIT_FAILURE);
     }
 
     sprintf(chaine,"**SYNCHRO**");
@@ -128,11 +133,6 @@ void SendSync(char *Site, int Port) {
     write(s_emis, chaine, longtxt);
     close (s_emis);
 }
-
-/***********************************************************************/
-/***********************************************************************/
-/***********************************************************************/
-/***********************************************************************/
 
 int main (int argc, char* argv[]) {
     struct sockaddr_in sock_add, sock_add_dist;
@@ -147,8 +147,8 @@ int main (int argc, char* argv[]) {
 
 
     if (argc < 3) {
-        printf("Erreur: il faut donner au moins 2 sites pour faire fonctionner l'application: NumeroPortBase et liste_des_sites");
-        exit(-1);
+        printf("Erreur: il faut donner au moins 2 sites pour faire fonctionner l'application: NumeroPortBase et liste_des_sites\n");
+        exit(EXIT_FAILURE);
     }
 
     /*----Nombre de sites (adresses de machines)---- */
@@ -165,14 +165,14 @@ int main (int argc, char* argv[]) {
 
     if ( (s_ecoute=socket(AF_INET, SOCK_STREAM,0)) == -1) {
         perror("Creation socket");
-        exit(-1);
+        exit(EXIT_FAILURE);
     }
 
     if ( bind(s_ecoute,(struct sockaddr*) &sock_add, \
         sizeof(struct sockaddr_in))==-1)
     {
         perror("Bind socket");
-        exit(-1);
+        exit(EXIT_FAILURE);
     }
 
     listen(s_ecoute,30);
@@ -205,12 +205,12 @@ int main (int argc, char* argv[]) {
     /* Passage en mode non bloquant du accept pour tous*/
     /*---------------------------------------*/
     fcntl(s_ecoute,F_SETFL,O_NONBLOCK);
-    size_sock=sizeof(struct sockaddr_in);
+    size_sock = sizeof(struct sockaddr_in);
 
     /* Boucle infini*/
     while(1) {
         /* On commence par tester l'arrivée d'un message */
-        s_service=accept(s_ecoute,(struct sockaddr*) &sock_add_dist, &size_sock);
+        s_service = accept(s_ecoute,(struct sockaddr*) &sock_add_dist, &size_sock);
         if (s_service > 0) {
             /*Extraction et affichage du message */
             l = read(s_service, texte, 39);
@@ -228,6 +228,6 @@ int main (int argc, char* argv[]) {
         printf("."); fflush(0); /* pour montrer que le serveur est actif*/
     }
 
-    close (s_ecoute);
-    return 0;
+    close(s_ecoute);
+    return EXIT_SUCCESS;
 }
