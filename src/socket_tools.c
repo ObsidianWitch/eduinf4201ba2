@@ -123,6 +123,23 @@ int send_complete(int sockfd, char* msg, int msg_size) {
 }
 
 /**
+ * Send a complete message to the specified host:port
+ *
+ * @param hostname
+ * @param port
+ */
+int send_complete_host(char *hostname, int port, char* msg, int msg_size) {
+    int s_emis, status;
+
+    s_emis = init_stream_client_socket(hostname, port);
+    status = send_complete(s_emis, msg, msg_size);
+
+    close(s_emis);
+    
+    return status;
+}
+
+/**
  * Receive a complete message by making multiple recv calls, and each time
  * a recv call returns, prints it.
  *

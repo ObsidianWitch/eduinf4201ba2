@@ -46,10 +46,11 @@ necessaire
 #include <netdb.h>
 #include <string.h>
 #include "socket_tools.h"
+#include "message_tools.h"
 
 int GetSitePos(int Nbsites, char *argv[]) ;
 void WaitSync(int socket);
-void SendSync(char *site, int Port);
+void send_sync(char *site, int Port);
 
 /**
  * Identification de ma position dans la liste
@@ -97,42 +98,13 @@ void WaitSync(int s_ecoute) {
 }
 
 /**
- * Envoie d'un msg de synchro a la machine Site/Port
+ * Send a synchronization message to the specified host:port
  */
-void SendSync(char *Site, int Port) {
-    struct hostent* hp;
-    int s_emis;
+void send_sync(char *site, int port) {
     char chaine[15];
-    int longtxt;
-    struct sockaddr_in sock_add_emis;
-    int size_sock;
-
-    if ( (s_emis=socket(AF_INET, SOCK_STREAM, 0)) == -1) {
-        perror("SendSync : Creation socket");
-        exit(EXIT_FAILURE);
-    }
-
-    hp = gethostbyname(Site);
-    if (hp == NULL) {
-        perror("SendSync: Gethostbyname");
-        exit(EXIT_FAILURE);
-    }
-
-    size_sock = sizeof(struct sockaddr_in);
-    sock_add_emis.sin_family = AF_INET;
-    sock_add_emis.sin_port = htons(Port);
-    memcpy(&sock_add_emis.sin_addr.s_addr, hp->h_addr, hp->h_length);
-
-    if (connect(s_emis, (struct sockaddr*) &sock_add_emis, size_sock) == -1) {
-        perror("SendSync : Connect");
-        exit(EXIT_FAILURE);
-    }
-
+    
     sprintf(chaine,"**SYNCHRO**");
-    longtxt = strlen(chaine);
-    /*Emission d'un message de synchro*/
-    write(s_emis, chaine, longtxt);
-    close (s_emis);
+	send_complete_host(site, port, chaine, strlen(chaine));
 }
 
 int main (int argc, char* argv[]) {
@@ -188,13 +160,13 @@ int main (int argc, char* argv[]) {
 
         /*et envoie un msg a chaque autre site pour les synchroniser */
         for ( i = 0 ; i < NSites - 1 ; i++) {
-            SendSync(argv[3+i], atoi(argv[1]) + i + 1);
+            send_sync(argv[3+i], atoi(argv[1]) + i + 1);
         }
     }
     else {
         /* Chaque autre site envoie un message au site0
         (1er  dans la liste) pour dire qu'il est lance'*/
-        SendSync(argv[2], atoi(argv[1]));
+        send_sync(argv[2], atoi(argv[1]));
         /*et attend un message du Site 0 envoye' quand tous seront lance's*/
         printf("Wait Synchro du Site 0\n"); fflush(0);
         WaitSync(s_ecoute);
