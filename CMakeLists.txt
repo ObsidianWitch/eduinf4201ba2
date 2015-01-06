@@ -10,6 +10,8 @@ add_executable(TP-DIST.out
     src/TP-DIST.c
     src/socket_tools.c
     src/socket_tools.h
+    src/message_tools.c
+    src/message_tools.h
 )
 
 add_executable(TP-DIST-CL.out

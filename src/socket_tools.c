@@ -155,7 +155,7 @@ int recv_print(int sockfd) {
  * @param sockfd
  * @return message on success, NULL otherwise
 */
-char* recv(int sockfd) {
+char* recv_complete(int sockfd) {
 	int total_recv_size = 0;
     int recv_size;
     char *buf = malloc(BUFFER_LEN);
