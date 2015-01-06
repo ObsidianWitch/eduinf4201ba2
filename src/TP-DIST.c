@@ -145,7 +145,6 @@ int main (int argc, char* argv[]) {
     int PortBase = -1; /*Numero du port de la socket a` creer*/
     int NSites = -1; /*Nb total de sites*/
 
-
     if (argc < 3) {
         printf("Erreur: il faut donner au moins 2 sites pour faire fonctionner l'application: NumeroPortBase et liste_des_sites\n");
         exit(EXIT_FAILURE);
@@ -178,7 +177,7 @@ int main (int argc, char* argv[]) {
     listen(s_ecoute,30);
     /*----La socket est maintenant cre'e'e, binde'e et listen----*/
 
-    if (GetSitePos(NSites, argv) ==0) {
+    if (GetSitePos(NSites, argv) == 0) {
         /*Le site 0 attend une connexion de chaque site : */
         for (i = 0 ; i < NSites - 1 ; i++) {
             WaitSync(s_ecoute);
