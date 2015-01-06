@@ -45,6 +45,7 @@ necessaire
 #include <fcntl.h>
 #include <netdb.h>
 #include <string.h>
+#include "socket_tools.h"
 
 int GetSitePos(int Nbsites, char *argv[]) ;
 void WaitSync(int socket);

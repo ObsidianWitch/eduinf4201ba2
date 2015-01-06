@@ -1,6 +1,8 @@
 build/
 *.pdf
-sud
+*~
+
 # Netkit
 *.disk
 netkit_lab/shared/root
+
