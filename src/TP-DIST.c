@@ -119,7 +119,11 @@ int main (int argc, char* argv[]) {
     int NSites = -1; /*Nb total de sites*/
 
     if (argc < 3) {
-        printf("Erreur: il faut donner au moins 2 sites pour faire fonctionner l'application: Numerobase_port et liste_des_sites\n");
+        printf(
+		    "Missing arguments (at least 2 hosts must be given)\n"
+		    "Usage : %s base_port host1 host2 ...\n",
+		    argv[0]
+        );
         exit(EXIT_FAILURE);
     }
 
