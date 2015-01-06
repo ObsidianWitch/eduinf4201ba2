@@ -42,7 +42,7 @@ int init_stream_server_socket(int port) {
     }
 
     // Passive (listening) socket
-    status = listen(sockfd, 1);
+    status = listen(sockfd, 30);
     if (status == -1) {
         perror("server - listen");
         exit(EXIT_FAILURE);

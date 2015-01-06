@@ -108,47 +108,29 @@ void send_sync(char *site, int port) {
 }
 
 int main (int argc, char* argv[]) {
-    struct sockaddr_in sock_add, sock_add_dist;
+    struct sockaddr_in sock_add_dist;
     socklen_t size_sock;
     int s_ecoute, s_service;
     char texte[40];
     int i, l;
     float t;
 
-    int PortBase = -1; /*Numero du port de la socket a` creer*/
+    int base_port = -1; /*Numero du port de la socket a` creer*/
     int NSites = -1; /*Nb total de sites*/
 
     if (argc < 3) {
-        printf("Erreur: il faut donner au moins 2 sites pour faire fonctionner l'application: NumeroPortBase et liste_des_sites\n");
+        printf("Erreur: il faut donner au moins 2 sites pour faire fonctionner l'application: Numerobase_port et liste_des_sites\n");
         exit(EXIT_FAILURE);
     }
 
     /*----Nombre de sites (adresses de machines)---- */
     NSites = argc - 2;
 
-
     /*CREATION&BINDING DE LA SOCKET DE CE SITE*/
-    PortBase = atoi(argv[1]) + GetSitePos(NSites, argv);
-    printf("Numero de port de ce site %d\n", PortBase);
+    base_port = atoi(argv[1]) + GetSitePos(NSites, argv);
+    printf("Numero de port de ce site %d\n", base_port);
 
-    sock_add.sin_family = AF_INET;
-    sock_add.sin_addr.s_addr = htons(INADDR_ANY);
-    sock_add.sin_port = htons(PortBase);
-
-    if ( (s_ecoute=socket(AF_INET, SOCK_STREAM,0)) == -1) {
-        perror("Creation socket");
-        exit(EXIT_FAILURE);
-    }
-
-    if ( bind(s_ecoute,(struct sockaddr*) &sock_add, \
-        sizeof(struct sockaddr_in))==-1)
-    {
-        perror("Bind socket");
-        exit(EXIT_FAILURE);
-    }
-
-    listen(s_ecoute,30);
-    /*----La socket est maintenant cre'e'e, binde'e et listen----*/
+	s_ecoute = init_stream_server_socket(base_port);
 
     if (GetSitePos(NSites, argv) == 0) {
         /*Le site 0 attend une connexion de chaque site : */
