@@ -49,6 +49,7 @@ necessaire
 #include "message_tools.h"
 
 int GetSitePos(int Nbsites, char *argv[]) ;
+void sync_hosts(int s_listen, int nhosts, char* argv[]);
 void WaitSync(int socket);
 void send_sync(char *site, int Port);
 
@@ -77,12 +78,42 @@ int GetSitePos(int NbSites, char *argv[]) {
     return -1;
 }
 
+/**
+ * Synchronize hosts between themselves. The first host waits for the sync message from the other
+ * hosts, and then send them a sync message.
+ *
+ * @param s_listen Listening socket file descriptor
+ * @param nhosts Number of hosts
+ * @param argv Arguments given to the program, contain the hostnames
+ */
+void sync_hosts(int s_listen, int nhosts, char* argv[]) {
+    int i;
+
+    if (GetSitePos(nhosts, argv) == 0) {
+        for (i = 0 ; i < nhosts - 1 ; i++) {
+            WaitSync(s_listen);
+        }
+
+        printf("Toutes les synchros recues \n");fflush(0);
+
+        for ( i = 0 ; i < nhosts - 1 ; i++) {
+            send_sync(argv[3+i], atoi(argv[1]) + i + 1);
+        }
+    }
+    else {
+        send_sync(argv[2], atoi(argv[1]));
+
+        printf("Wait Synchro du Site 0\n"); fflush(0);
+        WaitSync(s_listen);
+        printf("Synchro recue de Site 0\n"); fflush(0);
+    }
+}
 
 /**
  * Attente bloquante d'un msg de synchro sur la socket donnée
  * TODO refacto
  */
-void WaitSync(int s_ecoute) {
+void WaitSync(int s_listen) {
     char texte[40];
     int l;
     int s_service;
@@ -91,7 +122,7 @@ void WaitSync(int s_ecoute) {
 
     size_sock = sizeof(struct sockaddr_in);
     printf("WaitSync : "); fflush(0);
-    s_service = accept(s_ecoute,(struct sockaddr*) &sock_add_dist,&size_sock);
+    s_service = accept(s_listen,(struct sockaddr*) &sock_add_dist,&size_sock);
     l = read(s_service,texte,39);
     texte[l] = '\0';
     printf("%s\n",texte); fflush(0);
@@ -111,13 +142,10 @@ void send_sync(char *site, int port) {
 int main (int argc, char* argv[]) {
     struct sockaddr_in sock_add_dist;
     socklen_t size_sock;
-    int s_ecoute, s_service;
+    int s_listen, s_service;
     char texte[40];
-    int i, l;
+    int l, nhosts, base_port;
     float t;
-
-    int base_port = -1; /*Numero du port de la socket a` creer*/
-    int NSites = -1; /*Nb total de sites*/
 
     if (argc < 3) {
         printf(
@@ -128,47 +156,21 @@ int main (int argc, char* argv[]) {
         exit(EXIT_FAILURE);
     }
 
-    /*----Nombre de sites (adresses de machines)---- */
-    NSites = argc - 2;
-
-    /*CREATION&BINDING DE LA SOCKET DE CE SITE*/
-    base_port = atoi(argv[1]) + GetSitePos(NSites, argv);
+    nhosts = argc - 2;
+    base_port = atoi(argv[1]) + GetSitePos(nhosts, argv);
     printf("Numero de port de ce site %d\n", base_port);
 
-	s_ecoute = init_stream_server_socket(base_port);
+	s_listen = init_stream_server_socket(base_port);
 
-    if (GetSitePos(NSites, argv) == 0) {
-        /*Le site 0 attend une connexion de chaque site : */
-        for (i = 0 ; i < NSites - 1 ; i++) {
-            WaitSync(s_ecoute);
-        }
+    sync_hosts(s_listen, nhosts, argv);
 
-        printf("Toutes les synchros recues \n");fflush(0);
+    // Set the socket to non-blocking
+    fcntl(s_listen, F_SETFL, O_NONBLOCK);
 
-        /*et envoie un msg a chaque autre site pour les synchroniser */
-        for ( i = 0 ; i < NSites - 1 ; i++) {
-            send_sync(argv[3+i], atoi(argv[1]) + i + 1);
-        }
-    }
-    else {
-        /* Chaque autre site envoie un message au site0
-        (1er  dans la liste) pour dire qu'il est lance'*/
-        send_sync(argv[2], atoi(argv[1]));
-        /*et attend un message du Site 0 envoye' quand tous seront lance's*/
-        printf("Wait Synchro du Site 0\n"); fflush(0);
-        WaitSync(s_ecoute);
-        printf("Synchro recue de Site 0\n"); fflush(0);
-    }
-
-    /* Passage en mode non bloquant du accept pour tous*/
-    /*---------------------------------------*/
-    fcntl(s_ecoute,F_SETFL,O_NONBLOCK);
     size_sock = sizeof(struct sockaddr_in);
-
-    /* Boucle infini*/
     while(1) {
         /* On commence par tester l'arrivée d'un message */
-        s_service = accept(s_ecoute,(struct sockaddr*) &sock_add_dist, &size_sock);
+        s_service = accept(s_listen,(struct sockaddr*) &sock_add_dist, &size_sock);
         if (s_service > 0) {
             /*Extraction et affichage du message */
             l = read(s_service, texte, 39);
@@ -186,6 +188,6 @@ int main (int argc, char* argv[]) {
         printf("."); fflush(0); /* pour montrer que le serveur est actif*/
     }
 
-    close(s_ecoute);
+    close(s_listen);
     return EXIT_SUCCESS;
 }
