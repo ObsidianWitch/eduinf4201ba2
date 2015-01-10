@@ -1,11 +1,11 @@
-/* T. Grandpierre - Application distribue'e pour TP IF4-DIST 2004-2005
+/* T. Grandpierre - Application distribuée pour TP IF4-DIST 2004-2005
 
 But :
 
 fournir un squelette d'application capable de recevoir des messages en
 mode non bloquant provenant de sites connus. L'objectif est de fournir
 une base pour implementer les horloges logique/vectorielle/scalaire, ou
-bien pour implementer l'algorithme d'exclusion mutuelle distribue'
+bien pour implementer l'algorithme d'exclusion mutuelle distribué
 
 Syntaxe :
     arg 1 : Numero du 1er port
@@ -21,17 +21,17 @@ pc5201b>./dist 5000 pc5201a.esiee.fr pc5201b.esiee.fr pc5201c.esiee.fr
 pc5201c>./dist 5000 pc5201a.esiee.fr pc5201b.esiee.fr pc5201c.esiee.fr
 
 pc5201a commence par attendre que les autres applications (sur autres
-sites) soient lance's
+sites) soient lancés
 
 Chaque autre site (pc5201b, pc5201c) attend que le 1er site de la
-liste (pc5201a) envoi un message indiquant que tous les sites sont lance's
+liste (pc5201a) envoi un message indiquant que tous les sites sont lancés
 
 
 Chaque Site passe ensuite en attente de connexion non bloquante (connect)
 sur son port d'ecoute (respectivement 5000, 5001, 5002).
 On fournit ensuite un exemple permettant
 1) d'accepter la connexion
-2) lire le message envoye' sur cette socket
+2) lire le message envoyé sur cette socket
 3) il est alors possible de renvoyer un message a l'envoyeur ou autre si
 necessaire
 */
@@ -80,6 +80,7 @@ int GetSitePos(int NbSites, char *argv[]) {
 
 /**
  * Attente bloquante d'un msg de synchro sur la socket donnée
+ * TODO refacto
  */
 void WaitSync(int s_ecoute) {
     char texte[40];
@@ -102,7 +103,7 @@ void WaitSync(int s_ecoute) {
  */
 void send_sync(char *site, int port) {
     char chaine[15];
-    
+
     sprintf(chaine,"**SYNCHRO**");
 	send_complete_host(site, port, chaine, strlen(chaine));
 }
@@ -156,9 +157,8 @@ int main (int argc, char* argv[]) {
         /*et attend un message du Site 0 envoye' quand tous seront lance's*/
         printf("Wait Synchro du Site 0\n"); fflush(0);
         WaitSync(s_ecoute);
-        printf("Synchro recue de  Site 0\n"); fflush(0);
+        printf("Synchro recue de Site 0\n"); fflush(0);
     }
-
 
     /* Passage en mode non bloquant du accept pour tous*/
     /*---------------------------------------*/

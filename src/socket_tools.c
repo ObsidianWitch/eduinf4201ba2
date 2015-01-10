@@ -135,7 +135,7 @@ int send_complete_host(char *hostname, int port, char* msg, int msg_size) {
     status = send_complete(s_emis, msg, msg_size);
 
     close(s_emis);
-    
+
     return status;
 }
 
@@ -187,9 +187,8 @@ char* recv_complete(int sockfd) {
 
         if (recv_size != 0) {
             buf[recv_size] = '\0';
-            printf("%s", buf);
         }
-        
+
         total_recv_size += recv_size;
     } while(recv_size != 0);
 

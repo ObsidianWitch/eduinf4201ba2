@@ -7,7 +7,7 @@ typedef struct message {
 } message;
 
 
-int send_message_complete(int sockfd, message* msg);
+int send_message_complete(char *hostname, int port, message* msg);
 char* pack_message(message* msg);
 message* receive_message_complete(int sockfd);
 message* unpack_message(char* msg);

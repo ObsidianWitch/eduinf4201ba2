@@ -10,10 +10,12 @@
  * Send a complete message (defined by the message structure).
  *
  * @param sockfd sending connected socket
+ * @param hostname
+ * @param port
  * @param msg message to send
  * @return Returns 0 on success, and -1 otherwise.
  */
-int send_message_complete(int sockfd, message* msg) {
+int send_message_complete(char *hostname, int port, message* msg) {
 	int status;
 	char* packed_message;
 	
@@ -22,7 +24,8 @@ int send_message_complete(int sockfd, message* msg) {
 		return -1;
 	}
 	
-	status = send_complete(sockfd, packed_message, strlen(packed_message));
+	status = send_complete_host(hostname, port, packed_message,
+		strlen(packed_message));
 	
 	return status;
 }
