@@ -1,58 +1,65 @@
 #include <stdlib.h>
+#include <stdio.h>
 #include "message_linked_list.h"
 
 node* create_node(message *msg) {
     node* new_node = malloc(sizeof(node));
 
-    new_node-> msg = msg;
-    new_node-> next = NULL;
+    new_node->msg = msg;
+    new_node->next = NULL;
 
     return new_node;
 }
 
-void free_node(node* n) {
-    free(n->msg);
-    free(n);
-}
-
 void free_linked_list(node* head) {
-    while (head != NULL) {
-        node* tmp = head->next;
+    node* cur_node = head;
 
-        free_node(head);
-
-        head = tmp;
+    while (cur_node != NULL) {
+        node* tmp = cur_node->next;
+        free(cur_node);
+        cur_node = tmp;
     }
 }
 
-void insert_message(node** linked_list, message* msg) {
-    node* new_node = create_node(msg);
+void insert_message(node** linked_list, message* new_msg) {
+    node* new_node = create_node(new_msg);
 
     if (*linked_list == NULL) {
         *linked_list = new_node;
     }
-    else if ((*linked_list)->msg->el > msg->el) {
-        new_node->next = *linked_list;
-        *linked_list = new_node;
-    }
     else {
-        //node* next_node;
         node* cur_node = *linked_list;
+        node* next_node = cur_node->next;
 
-        while(cur_node != NULL && cur_node->msg->el < msg->el) {
+        while(next_node != NULL && next_node->msg->el < new_msg->el) {
             cur_node = cur_node->next;
+            next_node = cur_node->next;
         }
 
         /* TODO ?
         next_node = cur_node->next;
-        if (next_node->msg->el == msg->el &&
-            next_node->msg->host_id < msg->host_id)
+        if (next_node->msg->el == new_msg->el &&
+            next_node->msg->host_id < new_msg->host_id)
         {
             cur_node = next_node;
         }
         */
 
-        new_node->next = cur_node->next;
+        new_node->next = next_node;
         cur_node->next = new_node;
+    }
+}
+
+/**
+ * Prints all the messages contained in the linked list given in parameter.
+ *
+ * @param head Linked list's head
+ */
+void print_messages_linked_list(node* head) {
+    node* cur_node = head;
+
+    while (cur_node != NULL) {
+        printf("%d - %s\n", cur_node->msg->el, cur_node->msg->str);
+        cur_node = cur_node->next;
     }
 }

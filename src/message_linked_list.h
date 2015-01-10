@@ -9,8 +9,8 @@ typedef struct node {
 } node;
 
 node* create_node(message *msg);
-void free_node(node* n);
 void free_linked_list(node* head);
 void insert_message(node** linked_list, message* msg);
+void print_messages_linked_list(node* head);
 
 #endif // LINKED_LIST_H
