@@ -2,6 +2,7 @@
 #define MESSAGE_TOOLS_H
 
 typedef struct message {
+	// TODO int host_id ?
 	int el;
 	char* str;
 } message;
