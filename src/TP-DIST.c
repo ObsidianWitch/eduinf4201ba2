@@ -47,11 +47,13 @@ necessaire
 #include <string.h>
 #include "socket_tools.h"
 #include "message_tools.h"
+#include "message_linked_list.h"
 
 int GetSitePos(int Nbsites, char *argv[]) ;
 void sync_hosts(int s_listen, int nhosts, char* argv[]);
 void WaitSync(int socket);
 void send_sync(char *site, int Port);
+void main_loop_body(int s_listen);
 
 /**
  * Identification de ma position dans la liste
@@ -139,13 +141,9 @@ void send_sync(char *site, int port) {
 	send_complete_host(site, port, chaine, strlen(chaine));
 }
 
-int main (int argc, char* argv[]) {
-    struct sockaddr_in sock_add_dist;
-    socklen_t size_sock;
-    int s_listen, s_service;
-    char texte[40];
-    int l, nhosts, base_port;
-    float t;
+int main(int argc, char* argv[]) {
+    int s_listen;
+    int nhosts, base_port;
 
     if (argc < 3) {
         printf(
@@ -167,27 +165,26 @@ int main (int argc, char* argv[]) {
     // Set the socket to non-blocking
     fcntl(s_listen, F_SETFL, O_NONBLOCK);
 
-    size_sock = sizeof(struct sockaddr_in);
     while(1) {
-        /* On commence par tester l'arrivée d'un message */
-        s_service = accept(s_listen,(struct sockaddr*) &sock_add_dist, &size_sock);
-        if (s_service > 0) {
-            /*Extraction et affichage du message */
-            l = read(s_service, texte, 39);
-            texte[l] = '\0';
-            printf("Message recu : %s\n", texte); fflush(0);
-            close(s_service);
-        }
-
-        /* Petite boucle d'attente : c'est ici que l'on peut faire des choses*/
-        for (l = 0 ; l < 1000000 ; l++) {
-            t = t*3;
-            t = t/3;
-        }
-
-        printf("."); fflush(0); /* pour montrer que le serveur est actif*/
+        main_loop_body(s_listen);
     }
 
     close(s_listen);
     return EXIT_SUCCESS;
+}
+
+void main_loop_body(int s_listen) {
+    int s_client;
+    char* buf;
+
+    s_client = accept(s_listen, NULL, NULL);
+    if (s_client > 0) {
+        buf = recv_complete(s_client);
+        printf("Message recu : %s\n", buf); fflush(0);
+        close(s_client);
+    }
+
+    // FIXME B Function
+
+    // FIXME E Function
 }
