@@ -1,7 +1,8 @@
+#include <stdlib.h>
 #include "message_linked_list.h"
 
 node* create_node(message *msg) {
-    node new_node* = malloc(sizeof(node));
+    node* new_node = malloc(sizeof(node));
 
     new_node-> msg = msg;
     new_node-> next = NULL;
@@ -15,7 +16,7 @@ void free_node(node* n) {
 }
 
 void free_linked_list(node* head) {
-    while (*linked_list != NULL) {
+    while (head != NULL) {
         node* tmp = head->next;
 
         free_node(head);
@@ -30,12 +31,12 @@ void insert_message(node** linked_list, message* msg) {
     if (*linked_list == NULL) {
         *linked_list = new_node;
     }
-    else if (*linked_list->msg->el > msg->el) {
+    else if ((*linked_list)->msg->el > msg->el) {
         new_node->next = *linked_list;
         *linked_list = new_node;
     }
     else {
-        node* next_node;
+        //node* next_node;
         node* cur_node = *linked_list;
 
         while(cur_node != NULL && cur_node->msg->el < msg->el) {
