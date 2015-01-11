@@ -67,23 +67,20 @@ int max(int a, int b) {
  * Identification de ma position dans la liste
  */
 int get_host_pos(int nhosts, char *argv[]) {
-    char MySiteName[20];
-    int MySitePos = -1;
-    int i;
-    gethostname(MySiteName, 20);
+    char hostname[20];
+    int hostpos, i;
+
+    gethostname(hostname, 20);
 
     for (i = 0 ; i < nhosts ; i++) {
-        if (strcmp(MySiteName, argv[i+2]) == 0) {
-            MySitePos = i;
-            //printf("L'indice de %s est %d\n",MySiteName,MySitePos);
-            return MySitePos;
+        if (strcmp(hostname, argv[i+2]) == 0) {
+            hostpos = i;
+            return hostpos;
         }
     }
 
-    if (MySitePos == -1) {
-        printf("Indice du Site courant non trouve' dans la liste\n");
-        exit(EXIT_FAILURE);
-    }
+    printf("Could not find hostname's index\n");
+    exit(EXIT_FAILURE);
 
     return -1;
 }
