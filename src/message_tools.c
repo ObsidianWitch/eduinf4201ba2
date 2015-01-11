@@ -4,7 +4,7 @@
 #include "message_tools.h"
 #include "socket_tools.h"
 
-#define BUFFER_LEN 256
+#define BUFFER_LEN 64
 
 /**
  * Send a complete message (defined by the message structure).
@@ -98,6 +98,6 @@ message* unpack_message(char* msg) {
 }
 
 void free_message(message* msg) {
-	free(msg->str);
-	free(msg);
+	//free(msg->str);
+	//free(msg);
 }

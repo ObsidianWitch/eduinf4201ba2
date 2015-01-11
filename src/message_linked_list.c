@@ -101,17 +101,15 @@ void pop(node** linked_list) {
  *
  * @param head Linked list's head
  */
-void print_messages_linked_list(node* head) {
-    node* cur_node = head;
-
-    while (cur_node != NULL) {
+void print_messages_linked_list(const node* head) {
+    while (head != NULL) {
         printf(
             "%d - %d - %s\n",
-            cur_node->msg->host_id,
-            cur_node->msg->timestamp,
-            cur_node->msg->str
+            head->msg->host_id,
+            head->msg->timestamp,
+            head->msg->str
         );
 
-        cur_node = cur_node->next;
+        head = head->next;
     }
 }

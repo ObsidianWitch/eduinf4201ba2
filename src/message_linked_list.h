@@ -14,6 +14,6 @@ void free_linked_list(node* head);
 int nodecmp(const node* n1, const node* n2);
 void insert_message(node** linked_list, message* msg);
 void pop(node** linked_list);
-void print_messages_linked_list(node* head);
+void print_messages_linked_list(const node* head);
 
 #endif // LINKED_LIST_H
