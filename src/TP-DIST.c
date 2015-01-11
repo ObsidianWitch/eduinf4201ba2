@@ -55,7 +55,7 @@ necessaire
 
 int get_host_pos(int nhosts, char *argv[]) ;
 void sync_hosts(int s_listen, int nhosts, char* argv[]);
-void WaitSync(int socket);
+void wait_sync(int socket);
 void send_sync(char *host, int Port);
 void main_loop(int s_listen, int nhosts, char *argv[]);
 
@@ -101,7 +101,7 @@ void sync_hosts(int s_listen, int nhosts, char* argv[]) {
 
     if (get_host_pos(nhosts, argv) == 0) {
         for (i = 0 ; i < nhosts - 1 ; i++) {
-            WaitSync(s_listen);
+            wait_sync(s_listen);
         }
 
         printf("Toutes les synchros recues \n");fflush(0);
@@ -114,29 +114,26 @@ void sync_hosts(int s_listen, int nhosts, char* argv[]) {
         send_sync(argv[2], atoi(argv[1]));
 
         printf("Wait Synchro du Site 0\n"); fflush(0);
-        WaitSync(s_listen);
+        wait_sync(s_listen);
         printf("Synchro recue de Site 0\n"); fflush(0);
     }
 }
 
 /**
  * Attente bloquante d'un msg de synchro sur la socket donnée
- * TODO refacto
  */
-void WaitSync(int s_listen) {
-    char texte[40];
-    int l;
+void wait_sync(int s_listen) {
+    char* buf;
     int s_service;
-    struct sockaddr_in sock_add_dist;
-    socklen_t size_sock;
 
-    size_sock = sizeof(struct sockaddr_in);
-    printf("WaitSync : "); fflush(0);
-    s_service = accept(s_listen,(struct sockaddr*) &sock_add_dist,&size_sock);
-    l = read(s_service,texte,39);
-    texte[l] = '\0';
-    printf("%s\n",texte); fflush(0);
+    printf("wait_sync : "); fflush(0);
+
+    s_service = accept(s_listen, NULL, NULL);
+    buf = recv_complete(s_service);
+
+    printf("%s\n",buf); fflush(0);
     close(s_service);
+    free(buf);
 }
 
 /**
