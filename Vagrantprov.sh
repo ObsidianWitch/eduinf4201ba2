@@ -1,4 +1,4 @@
 #!/bin/sh
 
 apt-get update
-apt-get install -y git cmake g++
+apt-get install -y git cmake g++ valgrind
