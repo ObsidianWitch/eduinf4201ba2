@@ -49,22 +49,30 @@ necessaire
 #include "message_tools.h"
 #include "message_linked_list.h"
 
-int GetSitePos(int Nbsites, char *argv[]) ;
+#define STATE_NOTHING 0
+#define STATE_CRITICAL_SECTION 1
+#define STATE_WAITING 2
+
+int get_host_pos(int nhosts, char *argv[]) ;
 void sync_hosts(int s_listen, int nhosts, char* argv[]);
 void WaitSync(int socket);
-void send_sync(char *site, int Port);
-void main_loop_body(int s_listen);
+void send_sync(char *host, int Port);
+void main_loop(int s_listen, int nhosts, char *argv[]);
+
+int max(int a, int b) {
+    return (a > b) ? a : b;
+}
 
 /**
  * Identification de ma position dans la liste
  */
-int GetSitePos(int NbSites, char *argv[]) {
+int get_host_pos(int nhosts, char *argv[]) {
     char MySiteName[20];
     int MySitePos = -1;
     int i;
     gethostname(MySiteName, 20);
 
-    for (i = 0 ; i < NbSites ; i++) {
+    for (i = 0 ; i < nhosts ; i++) {
         if (strcmp(MySiteName, argv[i+2]) == 0) {
             MySitePos = i;
             //printf("L'indice de %s est %d\n",MySiteName,MySitePos);
@@ -91,7 +99,7 @@ int GetSitePos(int NbSites, char *argv[]) {
 void sync_hosts(int s_listen, int nhosts, char* argv[]) {
     int i;
 
-    if (GetSitePos(nhosts, argv) == 0) {
+    if (get_host_pos(nhosts, argv) == 0) {
         for (i = 0 ; i < nhosts - 1 ; i++) {
             WaitSync(s_listen);
         }
@@ -134,11 +142,9 @@ void WaitSync(int s_listen) {
 /**
  * Send a synchronization message to the specified host:port
  */
-void send_sync(char *site, int port) {
-    char chaine[15];
-
-    sprintf(chaine,"**SYNCHRO**");
-	send_complete_host(site, port, chaine, strlen(chaine));
+void send_sync(char *host, int port) {
+    char chaine[] = "**SYNCHRO**";
+	send_complete_host(host, port, chaine, strlen(chaine));
 }
 
 int main(int argc, char* argv[]) {
@@ -155,7 +161,7 @@ int main(int argc, char* argv[]) {
     }
 
     nhosts = argc - 2;
-    base_port = atoi(argv[1]) + GetSitePos(nhosts, argv);
+    base_port = atoi(argv[1]) + get_host_pos(nhosts, argv);
     printf("Numero de port de ce site %d\n", base_port);
 
 	s_listen = init_stream_server_socket(base_port);
@@ -165,26 +171,95 @@ int main(int argc, char* argv[]) {
     // Set the socket to non-blocking
     fcntl(s_listen, F_SETFL, O_NONBLOCK);
 
-    while(1) {
-        main_loop_body(s_listen);
-    }
+    main_loop(s_listen, nhosts, argv);
 
     close(s_listen);
     return EXIT_SUCCESS;
 }
 
-void main_loop_body(int s_listen) {
-    int s_client;
-    char* buf;
+void main_loop(int s_listen, int nhosts, char *argv[]) {
+    int responses = 0, logical_clock = 0;
+    int state = STATE_NOTHING;
+    int cur_host_id = get_host_pos(nhosts, argv);
+    node* queue = NULL;
 
-    s_client = accept(s_listen, NULL, NULL);
-    if (s_client > 0) {
-        buf = recv_complete(s_client);
-        printf("Message recu : %s\n", buf); fflush(0);
-        close(s_client);
+    while (1) {
+        int s_client = accept(s_listen, NULL, NULL);
+        if (s_client > 0) {
+            message *msg = receive_message_complete(s_client);
+            logical_clock = max(logical_clock, msg->timestamp);
+
+            printf("Host(%d) - Clock(%d) - Received message : %s\n",
+                cur_host_id, logical_clock, msg->str
+            ); fflush(0);
+            close(s_client);
+
+            if (strcmp(msg->str, "request") == 0) {
+                message response;
+                int recipient;
+
+                insert_message(&queue, msg);
+                logical_clock++;
+
+                response.host_id = cur_host_id;
+                response.timestamp = logical_clock;
+                response.str = "response";
+                recipient = msg->host_id;
+                send_message_complete(argv[2 + recipient], atoi(argv[1]) + recipient, &response);
+            }
+            else if (strcmp(msg->str, "response") == 0) {
+                responses++;
+            }
+            else if (strcmp(msg->str, "free") == 0) {
+                pop(&queue);
+            }
+
+            free_message(msg);
+        }
+
+        if (queue != NULL &&
+            queue->msg->host_id == cur_host_id &&
+            responses == nhosts - 1)
+        {
+            responses = 0;
+            state = STATE_CRITICAL_SECTION;
+            printf("Host[%d] begin critical section\n", cur_host_id);
+        }
+
+        // Choose randomly whether the current host must change state
+        if (rand() % nhosts == cur_host_id) {
+            if (state == STATE_NOTHING) {
+                message request_msg;
+                int i;
+
+                state = STATE_WAITING;
+                logical_clock++;
+
+                request_msg.host_id = cur_host_id;
+                request_msg.timestamp = logical_clock;
+                request_msg.str = "request";
+
+                for (i = 0 ; i < nhosts - 1 ; i++) {
+                    send_message_complete(argv[3 + i], atoi(argv[1]) + i + 1, &request_msg);
+                }
+            }
+            else if (state == STATE_CRITICAL_SECTION) {
+                message free_msg;
+                int i;
+
+                state = STATE_NOTHING;
+                logical_clock++;
+
+                free_msg.host_id = cur_host_id;
+                free_msg.timestamp = logical_clock;
+                free_msg.str = "free";
+
+                for (i = 0 ; i < nhosts - 1 ; i++) {
+                    send_message_complete(argv[3 + i], atoi(argv[1]) + i + 1, &free_msg);
+                }
+
+                pop(&queue);
+            }
+        }
     }
-
-    // FIXME B Function
-
-    // FIXME E Function
 }

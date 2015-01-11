@@ -40,8 +40,9 @@ char* pack_message(message* msg) {
 	char* buf = malloc(BUFFER_LEN);
 
 	int status = snprintf(buf, BUFFER_LEN,
-		"%d - %s",
-		msg->el,
+		"%d - %d - %s",
+		msg->host_id,
+		msg->timestamp,
 		msg->str
 	);
 
@@ -81,16 +82,22 @@ message* receive_message_complete(int sockfd) {
  */
 message* unpack_message(char* msg) {
 	message* unpacked_message = malloc(sizeof(message));
-	int el, status;
+	int host_id, timestamp, status;
 	char* buf = malloc(BUFFER_LEN);
 
-	status = sscanf(msg, "%d - %s", &el, buf);
-	if (status != 2) {
+	status = sscanf(msg, "%d - %d - %s", &host_id, &timestamp, buf);
+	if (status != 3) {
 		return NULL;
 	}
 
-	unpacked_message->el  = el;
+	unpacked_message->host_id = host_id;
+	unpacked_message->timestamp = timestamp;
 	unpacked_message->str = buf;
 
 	return unpacked_message;
+}
+
+void free_message(message* msg) {
+	free(msg->str);
+	free(msg);
 }

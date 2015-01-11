@@ -11,6 +11,7 @@ typedef struct node {
 node* create_node(message *msg);
 void free_linked_list(node* head);
 void insert_message(node** linked_list, message* msg);
+void pop(node** linked_list);
 void print_messages_linked_list(node* head);
 
 #endif // LINKED_LIST_H
