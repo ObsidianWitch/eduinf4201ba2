@@ -221,6 +221,8 @@ void main_loop(int s_listen, int nhosts, char *argv[]) {
         {
             responses = 0;
             state = STATE_CRITICAL_SECTION;
+            logical_clock++;
+
             printf("Host(%d) - Clock(%d) - Begin critical section\n", cur_host_id, logical_clock);
         }
 
@@ -231,7 +233,7 @@ void main_loop(int s_listen, int nhosts, char *argv[]) {
                 int i;
 
                 state = STATE_WAITING;
-                logical_clock++; // FIXME should this be updated before or after inserting message?
+                logical_clock++;
 
                 request_msg.host_id = cur_host_id;
                 request_msg.timestamp = logical_clock;
