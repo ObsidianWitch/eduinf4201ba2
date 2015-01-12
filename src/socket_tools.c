@@ -140,33 +140,6 @@ int send_complete_host(char *hostname, int port, char* msg, int msg_size) {
 }
 
 /**
- * Receive a complete message by making multiple recv calls, and each time
- * a recv call returns, prints it.
- *
- * @param sockfd
- * @return 0 on success, -1 otherwise.
-*/
-int recv_print(int sockfd) {
-    int recv_size;
-    char buf[BUFFER_LEN];
-
-    do {
-        recv_size = read(sockfd, buf, BUFFER_LEN - 1);
-        if (recv_size == -1) {
-            perror("read");
-            break;
-        }
-
-        if (recv_size != 0) {
-            buf[recv_size] = '\0';
-            printf("%s", buf);
-        }
-    } while(recv_size != 0);
-
-    return recv_size;
-}
-
-/**
  * Receive a complete message by making multiple recv calls.
  *
  * @param sockfd
@@ -185,6 +158,7 @@ char* recv_complete(int sockfd) {
             return NULL;
         }
 
+        // FIXME
         if (recv_size != 0) {
             buf[recv_size] = '\0';
         }
