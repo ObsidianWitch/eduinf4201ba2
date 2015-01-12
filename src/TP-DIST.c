@@ -200,10 +200,10 @@ void main_loop(int s_listen, int nhosts, char *argv[]) {
 
             printf("Host(%d) - Clock(%d) - Received (from %d) : %s\n",
                 cur_host_id, logical_clock, msg->host_id, msg->str
-            ); fflush(0);
+            );
 
             if (strcmp(msg->str, "request") == 0) {
-                message* msg_response;// = malloc(sizeof(message));
+                message* msg_response;
                 int recipient = msg->host_id;
 
                 insert_message(&queue, msg);
@@ -214,8 +214,10 @@ void main_loop(int s_listen, int nhosts, char *argv[]) {
                     cur_host_id, logical_clock, "response"
                 );
 
-                send_message(argv[2 + recipient], atoi(argv[1]) + recipient, msg_response);
-                printf("host(%d) - Clock(%d) - Sent response (to %d)\n", cur_host_id, logical_clock, recipient);
+                send_message(argv[2 + recipient], atoi(argv[1]) + recipient,
+                    msg_response);
+                printf("host(%d) - Clock(%d) - Sent response (to %d)\n",
+                    cur_host_id, logical_clock, recipient);
                 free_message(msg_response);
             }
             else if (strcmp(msg->str, "response") == 0) {
@@ -229,21 +231,9 @@ void main_loop(int s_listen, int nhosts, char *argv[]) {
             }
         }
 
-        if (queue != NULL &&
-            queue->msg->host_id == cur_host_id &&
-            responses == nhosts - 1)
-        {
-            responses = 0;
-            state = STATE_CRITICAL_SECTION;
-            logical_clock++;
-
-            printf("Host(%d) - Clock(%d) - Begin critical section\n",
-                cur_host_id, logical_clock);
-        }
-
-        // Choose randomly whether the current host must change state
-        if ((rand() % nhosts) == cur_host_id) {
-            if (state == STATE_NOTHING) {
+        if (state == STATE_NOTHING) {
+            // Choose randomly whether the current host must change state
+            if ((rand() % nhosts) == cur_host_id) {
                 message *request_msg;
 
                 logical_clock++;
@@ -259,24 +249,35 @@ void main_loop(int s_listen, int nhosts, char *argv[]) {
 
                 state = STATE_WAITING;
             }
-            else if (state == STATE_CRITICAL_SECTION) {
-                message *free_msg;
+        }
+        else if (state == STATE_WAITING &&
+            queue->msg->host_id == cur_host_id &&
+            responses == nhosts - 1)
+        {
+            responses = 0;
+            state = STATE_CRITICAL_SECTION;
+            logical_clock++;
 
+            printf("Host(%d) - Clock(%d) - Begin critical section\n",
+                cur_host_id, logical_clock);
+        }
 
-                logical_clock++;
+        if (state == STATE_CRITICAL_SECTION) {
+            message *free_msg;
 
-                free_msg = create_message(cur_host_id, logical_clock, "free");
-                send_message_all(nhosts, cur_host_id, argv, free_msg);
-                free_message(free_msg);
+            logical_clock++;
 
-                pop(&queue);
+            free_msg = create_message(cur_host_id, logical_clock, "free");
+            send_message_all(nhosts, cur_host_id, argv, free_msg);
+            free_message(free_msg);
 
-                printf("Host(%d) - Clock(%d) - End critical section\n",
-                    cur_host_id, logical_clock);
-                print_messages_linked_list(queue); // FIXME DEBUG ONLY
+            pop(&queue);
 
-                state = STATE_NOTHING;
-            }
+            printf("Host(%d) - Clock(%d) - End critical section\n",
+                cur_host_id, logical_clock);
+            print_messages_linked_list(queue); // FIXME DEBUG ONLY
+
+            state = STATE_NOTHING;
         }
     }
 }
