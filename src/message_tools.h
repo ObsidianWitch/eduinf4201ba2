@@ -7,6 +7,7 @@ typedef struct message {
 	char* str;
 } message;
 
+message* create_message(int host_id, int timestamp, const char* str);
 int send_message_complete(char *hostname, int port, message* msg);
 char* pack_message(message* msg);
 message* receive_message_complete(int sockfd);

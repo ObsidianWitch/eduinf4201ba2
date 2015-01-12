@@ -7,6 +7,27 @@
 #define BUFFER_LEN 64
 
 /**
+ * Create a message from the given parameters.
+ *
+ * @param host_id message's host_id
+ * @param timestamp message's timestamp
+ * @param str message's string, will be copied
+ * @return newly create message
+ */
+message* create_message(int host_id, int timestamp, const char* str) {
+	message* msg = malloc(sizeof(message));
+
+	msg->host_id = host_id;
+	msg->timestamp = timestamp;
+	msg->str = malloc(strlen(str) + 1);
+
+	// the string is copied to be sure we can free it later
+	strcpy(msg->str, str);
+
+	return msg;
+}
+
+/**
  * Send a complete message (defined by the message structure).
  *
  * @param sockfd sending connected socket
