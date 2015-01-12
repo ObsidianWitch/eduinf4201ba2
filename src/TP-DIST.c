@@ -190,18 +190,18 @@ void main_loop(int s_listen, int nhosts, char *argv[]) {
             ); fflush(0);
 
             if (strcmp(msg->str, "request") == 0) {
-                message response;
+                message* response = malloc(sizeof(message));
                 int recipient;
 
                 insert_message(&queue, msg);
                 logical_clock++;
                 print_messages_linked_list(queue); // FIXME DEBUG ONLY
 
-                response.host_id = cur_host_id;
-                response.timestamp = logical_clock;
-                response.str = "response";
+                response->host_id = cur_host_id;
+                response->timestamp = logical_clock;
+                response->str = "response";
                 recipient = msg->host_id;
-                send_message_complete(argv[2 + recipient], atoi(argv[1]) + recipient, &response);
+                send_message_complete(argv[2 + recipient], atoi(argv[1]) + recipient, response);
                 printf("host(%d) - Clock(%d) - Sent response (to %d)\n", cur_host_id, logical_clock, recipient);
             }
             else if (strcmp(msg->str, "response") == 0) {
