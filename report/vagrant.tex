@@ -1,0 +1,12 @@
+\section{Vagrant}
+
+Afin de pouvoir réaliser le TP en dehors de l'ESIEE, et sans avoir besoin de plusieurs machines, \emph{Vagrant} \cite{cite:vagrant} a été utilisé. Cet utilitaire permet de mettre en place des machines virtuelles, de les configurer ainsi que d'effectuer des actions automatiquement à leur démarrage (provisioning) (e.g. exécution d'un script installant des paquets).\\
+
+Le fichier \emph{Vagrantfile} ci-dessous permet de configurer 3 machines virtuelles Ubuntu Trusty Tahr en les assignant sur un même réseau privé et en exécutant le script \emph{Vagrantprov.sh} à leur démarrage. Ce dernier lance l'installation via \emph{apt} des paquets \emph{git}, \emph{cmake}, \emph{g++} et \emph{valgrind}, puis écrit des alias dans le fichier \emph{/etc/hosts} pour les trois machines.
+
+\lstinputlisting[caption=Vagrantfile, language=Ruby]{../Vagrantfile}
+
+\lstinputlisting[caption=Vagrantprov.sh, language=bash]{../Vagrantprov.sh}
+\
+
+Les machines virtuelles peuvent être lancées à l'aide de la commande \textbf{vagrant up}, et nous pouvons nous ssh dessus à l'aide de \textbf{vagrant ssh nom\_machine}.
