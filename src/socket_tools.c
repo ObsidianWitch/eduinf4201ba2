@@ -158,13 +158,10 @@ char* recv_complete(int sockfd) {
             return NULL;
         }
 
-        // FIXME
-        if (recv_size != 0) {
-            buf[recv_size] = '\0';
-        }
-
         total_recv_size += recv_size;
     } while(recv_size != 0);
+
+    buf[total_recv_size] = '\0';
 
     return buf;
 }
