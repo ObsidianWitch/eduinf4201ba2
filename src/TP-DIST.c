@@ -64,7 +64,11 @@ int max(int a, int b) {
 }
 
 /**
- * Identification de ma position dans la liste
+ * Retrieve the current host's id.
+ *
+ * @param nhosts Number of hosts
+ * @param argv Arguments given to the program, contain the hostnames
+ * @return current host's id
  */
 int get_host_pos(int nhosts, char *argv[]) {
     char hostname[20];
@@ -86,8 +90,8 @@ int get_host_pos(int nhosts, char *argv[]) {
 }
 
 /**
- * Synchronize hosts between themselves. The first host waits for the sync message from the other
- * hosts, and then send them a sync message.
+ * Synchronize hosts between themselves. The first host waits for the sync
+ * message from the other hosts, and then send them a sync message.
  *
  * @param s_listen Listening socket file descriptor
  * @param nhosts Number of hosts
@@ -117,7 +121,10 @@ void sync_hosts(int s_listen, int nhosts, char* argv[]) {
 }
 
 /**
- * Attente bloquante d'un msg de synchro sur la socket donnée
+ * Wait (blocking) for an incoming synchronization message from the given socket
+ * and print it.
+ *
+ * @param s_listen
  */
 void wait_sync(int s_listen) {
     char* buf;
@@ -135,6 +142,9 @@ void wait_sync(int s_listen) {
 
 /**
  * Send a synchronization message to the specified host and port.
+ *
+ * @param host
+ * @param port
  */
 void send_sync(char *host, int port) {
     char chaine[] = "**SYNCHRO**";
