@@ -1,17 +1,18 @@
-/* T. Grandpierre@esiee.fr TP IF4-DIST 2004-2005
-
-But : petit client qui se connecte plusieurs fois sur le meme port
-de la meme machine pour envoyer le meme message afin de tester le
-serveur
-
-args :
-
-
--machine serveur
--port serveur
--message
--nombre de copies du meme message (a chaque fois un connect)
-*/
+/**
+ * T. Grandpierre@esiee.fr TP IF4-DIST 2004-2005
+ *
+ * But : petit client qui se connecte plusieurs fois sur le meme port
+ * de la meme machine pour envoyer le meme message afin de tester le
+ * serveur
+ *
+ * args :
+ *
+ *
+ * - machine serveur
+ * - port serveur
+ * - message
+ * - nombre de copies du meme message (a chaque fois un connect)
+ */
 
 #include <stdio.h>
 #include <stdlib.h>

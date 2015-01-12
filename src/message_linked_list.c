@@ -2,6 +2,13 @@
 #include <stdio.h>
 #include "message_linked_list.h"
 
+/**
+ * Creates a node containing the message given in parameter and pointing to
+ * NULL.
+ *
+ * @param msg node's message
+ * @return Newly created node
+ */
 node* create_node(message *msg) {
     node* new_node = malloc(sizeof(node));
 
@@ -11,13 +18,24 @@ node* create_node(message *msg) {
     return new_node;
 }
 
+/**
+ * Frees the given node and the message contained in it.
+ *
+ * @param n Node which will be freed
+ */
 void free_node(node* n) {
     free_message(n->msg);
     free(n);
 }
 
-void free_linked_list(node** head) {
-    node* cur_node = *head;
+/**
+ * Frees all the nodes of a linked list. Once all the nodes are freed, The given
+ * linked_list points to NULL.
+ *
+ * @param linked_list Linked List which will be freed
+ */
+void free_linked_list(node** linked_list) {
+    node* cur_node = *linked_list;
 
     while (cur_node != NULL) {
         node* tmp = cur_node->next;
@@ -25,7 +43,7 @@ void free_linked_list(node** head) {
         cur_node = tmp;
     }
 
-    *head = NULL;
+    *linked_list = NULL;
 }
 
 /*
@@ -60,12 +78,27 @@ int nodecmp(const node* n1, const node* n2) {
     }
 }
 
+/**
+ * Inserts a node at the begining of the given linked_list.
+ *
+ * @param linked_list
+ * @param new_node
+ */
 void insert_node_front(node** linked_list, node* new_node) {
     node* tmp = *linked_list;
     *linked_list = new_node;
     new_node->next = tmp;
 }
 
+/**
+ * Inserts a node into the given linked_list. The node is created with the
+ * message in parameter. If the linked_list was ordered before the execution of
+ * this function, it will still be after : the node is inserted at the right
+ * place (list ordered by timestamp and host_id).
+ *
+ * @param linked_list
+ * @param new_msg
+ */
 void insert_message(node** linked_list, message* new_msg) {
     node* new_node = create_node(new_msg);
 
@@ -89,6 +122,11 @@ void insert_message(node** linked_list, message* new_msg) {
     }
 }
 
+/**
+ * Removes the first element from the given linked_list.
+ *
+ * @param linked_list
+ */
 void pop(node** linked_list) {
     if (*linked_list != NULL) {
         node* tmp = (*linked_list)->next;

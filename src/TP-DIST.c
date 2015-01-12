@@ -1,40 +1,41 @@
-/* T. Grandpierre - Application distribuée pour TP IF4-DIST 2004-2005
-
-But :
-
-fournir un squelette d'application capable de recevoir des messages en
-mode non bloquant provenant de sites connus. L'objectif est de fournir
-une base pour implementer les horloges logique/vectorielle/scalaire, ou
-bien pour implementer l'algorithme d'exclusion mutuelle distribué
-
-Syntaxe :
-    arg 1 : Numero du 1er port
-	arg 2 et suivant : nom de chaque machine
-
---------------------------------
-Exemple pour 3 site :
-
-Dans 3 shells lances sur 3 machines executer la meme application:
-
-pc5201a>./dist 5000 pc5201a.esiee.fr pc5201b.esiee.fr pc5201c.esiee.fr
-pc5201b>./dist 5000 pc5201a.esiee.fr pc5201b.esiee.fr pc5201c.esiee.fr
-pc5201c>./dist 5000 pc5201a.esiee.fr pc5201b.esiee.fr pc5201c.esiee.fr
-
-pc5201a commence par attendre que les autres applications (sur autres
-sites) soient lancés
-
-Chaque autre site (pc5201b, pc5201c) attend que le 1er site de la
-liste (pc5201a) envoi un message indiquant que tous les sites sont lancés
-
-
-Chaque Site passe ensuite en attente de connexion non bloquante (connect)
-sur son port d'ecoute (respectivement 5000, 5001, 5002).
-On fournit ensuite un exemple permettant
-1) d'accepter la connexion
-2) lire le message envoyé sur cette socket
-3) il est alors possible de renvoyer un message a l'envoyeur ou autre si
-necessaire
-*/
+/**
+ * T. Grandpierre - Application distribuée pour TP IF4-DIST 2004-2005
+ *
+ * But :
+ *
+ * fournir un squelette d'application capable de recevoir des messages en
+ * mode non bloquant provenant de sites connus. L'objectif est de fournir
+ * une base pour implementer les horloges logique/vectorielle/scalaire, ou
+ * bien pour implementer l'algorithme d'exclusion mutuelle distribué
+ *
+ * Syntaxe :
+ *   arg 1 : Numero du 1er port
+ *	 arg 2 et suivant : nom de chaque machine
+ *
+ * --------------------------------
+ * Exemple pour 3 site :
+ *
+ * Dans 3 shells lances sur 3 machines executer la meme application:
+ *
+ * pc5201a>./dist 5000 pc5201a.esiee.fr pc5201b.esiee.fr pc5201c.esiee.fr
+ * pc5201b>./dist 5000 pc5201a.esiee.fr pc5201b.esiee.fr pc5201c.esiee.fr
+ * pc5201c>./dist 5000 pc5201a.esiee.fr pc5201b.esiee.fr pc5201c.esiee.fr
+ *
+ * pc5201a commence par attendre que les autres applications (sur autres
+ * sites) soient lancés
+ *
+ * Chaque autre site (pc5201b, pc5201c) attend que le 1er site de la
+ * liste (pc5201a) envoi un message indiquant que tous les sites sont lancés
+ *
+ *
+ * Chaque Site passe ensuite en attente de connexion non bloquante (connect)
+ * sur son port d'ecoute (respectivement 5000, 5001, 5002).
+ * On fournit ensuite un exemple permettant
+ * 1) d'accepter la connexion
+ * 2) lire le message envoyé sur cette socket
+ * 3) il est alors possible de renvoyer un message a l'envoyeur ou autre si
+ * necessaire
+ */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -119,7 +120,7 @@ void main_loop(int s_listen, int nhosts, char *argv[]) {
 
                 insert_message(&queue, msg);
                 logical_clock++;
-                print_messages_linked_list(queue); // FIXME DEBUG ONLY
+                print_messages_linked_list(queue);
 
                 msg_response = create_message(
                     cur_host_id, logical_clock, "response"
@@ -137,12 +138,13 @@ void main_loop(int s_listen, int nhosts, char *argv[]) {
             }
             else if (strcmp(msg->str, "free") == 0) {
                 pop(&queue);
-                print_messages_linked_list(queue); // FIXME DEBUG ONLY
+                print_messages_linked_list(queue);
                 free_message(msg);
             }
         }
 
         // -- State update --
+        // Request critical section
         if (state == STATE_NOTHING) {
             // Choose randomly whether the current host must change state
             if ((rand() % nhosts) == cur_host_id) {
@@ -157,11 +159,12 @@ void main_loop(int s_listen, int nhosts, char *argv[]) {
 
                 printf("host(%d) - Clock(%d) - Sent request\n",
                     cur_host_id, logical_clock);
-                print_messages_linked_list(queue); // FIXME DEBUG ONLY
+                print_messages_linked_list(queue);
 
                 state = STATE_WAITING;
             }
         }
+        // Enter critical section
         else if (state == STATE_WAITING &&
             queue->msg->host_id == cur_host_id &&
             responses == nhosts - 1)
@@ -174,6 +177,7 @@ void main_loop(int s_listen, int nhosts, char *argv[]) {
                 cur_host_id, logical_clock);
         }
 
+        // Leave critical section
         if (state == STATE_CRITICAL_SECTION) {
             message *free_msg;
 
@@ -187,7 +191,7 @@ void main_loop(int s_listen, int nhosts, char *argv[]) {
 
             printf("Host(%d) - Clock(%d) - End critical section\n",
                 cur_host_id, logical_clock);
-            print_messages_linked_list(queue); // FIXME DEBUG ONLY
+            print_messages_linked_list(queue);
 
             state = STATE_NOTHING;
         }
