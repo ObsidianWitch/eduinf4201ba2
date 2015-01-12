@@ -190,7 +190,7 @@ void main_loop(int s_listen, int nhosts, char *argv[]) {
     while (1) {
         int s_client = accept(s_listen, NULL, NULL);
         if (s_client > 0) {
-            message *msg = receive_message_complete(s_client);
+            message *msg = receive_message(s_client);
             close(s_client);
             if (msg == NULL) {
                 exit(EXIT_FAILURE);
@@ -214,7 +214,7 @@ void main_loop(int s_listen, int nhosts, char *argv[]) {
                     cur_host_id, logical_clock, "response"
                 );
 
-                send_message_complete(argv[2 + recipient], atoi(argv[1]) + recipient, msg_response);
+                send_message(argv[2 + recipient], atoi(argv[1]) + recipient, msg_response);
                 printf("host(%d) - Clock(%d) - Sent response (to %d)\n", cur_host_id, logical_clock, recipient);
                 free_message(msg_response);
             }
@@ -251,7 +251,7 @@ void main_loop(int s_listen, int nhosts, char *argv[]) {
                 request_msg = create_message(cur_host_id, logical_clock, "request");
                 insert_message(&queue, request_msg);
 
-                send_message_complete_all(nhosts, cur_host_id, argv, request_msg);
+                send_message_all(nhosts, cur_host_id, argv, request_msg);
 
                 printf("host(%d) - Clock(%d) - Sent request\n",
                     cur_host_id, logical_clock);
@@ -266,7 +266,7 @@ void main_loop(int s_listen, int nhosts, char *argv[]) {
                 logical_clock++;
 
                 free_msg = create_message(cur_host_id, logical_clock, "free");
-                send_message_complete_all(nhosts, cur_host_id, argv, free_msg);
+                send_message_all(nhosts, cur_host_id, argv, free_msg);
                 free_message(free_msg);
 
                 pop(&queue);

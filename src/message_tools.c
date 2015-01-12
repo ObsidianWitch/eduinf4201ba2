@@ -21,14 +21,24 @@ message* create_message(int host_id, int timestamp, const char* str) {
 	msg->timestamp = timestamp;
 	msg->str = malloc(strlen(str) + 1);
 
-	// the string is copied to be sure we can free it later
+	/* The string is copied to be sure we can free it later. Problems may occur
+	 * otherwise if a string stored in the stack is given to a message. */
 	strcpy(msg->str, str);
 
 	return msg;
 }
 
 /**
- * Send a complete message (defined by the message structure).
+ * Free a message and the string contained in this message.
+ * @param msg Message to free
+ */
+void free_message(message* msg) {
+	free(msg->str);
+	free(msg);
+}
+
+/**
+ * Send a message (defined by the message structure).
  *
  * @param sockfd sending connected socket
  * @param hostname
@@ -36,7 +46,7 @@ message* create_message(int host_id, int timestamp, const char* str) {
  * @param msg Message to send
  * @return Returns 0 on success, and -1 otherwise.
  */
-int send_message_complete(char *hostname, int port, message* msg) {
+int send_message(char *hostname, int port, message* msg) {
 	int status;
 	char* packed_message;
 
@@ -53,7 +63,7 @@ int send_message_complete(char *hostname, int port, message* msg) {
 }
 
 /**
- * Send a complete message to all hosts (current host excluded).
+ * Send a message to all hosts (current host excluded).
  *
  * @param nhosts Number of hosts
  * @param cur_host_id Current host's id
@@ -62,14 +72,12 @@ int send_message_complete(char *hostname, int port, message* msg) {
  * @return 0 on success, -1 if one or more messages could not be sent
  * successfully.
  */
-int send_message_complete_all(int nhosts, int cur_host_id, char *argv[],
-	message* msg)
-{
+int send_message_all(int nhosts, int cur_host_id, char *argv[], message* msg) {
 	int i, status = 0;
 
     for (i = 0 ; i < nhosts ; i++) {
         if (i != cur_host_id) {
-            status += send_message_complete(
+            status += send_message(
 				argv[2 + i], atoi(argv[1]) + i, msg
 			);
         }
@@ -103,12 +111,12 @@ char* pack_message(message* msg) {
 }
 
 /**
- * Receive a complete message (defined by the message structure).
+ * Receive a message (defined by the message structure).
 
  * @param sockfd
  * @return received message on success, NULL otherwise
  */
-message* receive_message_complete(int sockfd) {
+message* receive_message(int sockfd) {
 	char* recv_msg;
 	message* unpacked_message;
 
@@ -144,9 +152,4 @@ message* unpack_message(char* msg) {
 	unpacked_message->str = buf;
 
 	return unpacked_message;
-}
-
-void free_message(message* msg) {
-	free(msg->str);
-	free(msg);
 }

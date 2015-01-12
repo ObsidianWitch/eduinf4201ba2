@@ -8,12 +8,13 @@ typedef struct message {
 } message;
 
 message* create_message(int host_id, int timestamp, const char* str);
-int send_message_complete(char *hostname, int port, message* msg);
-int send_message_complete_all(int nhosts, int cur_host_id, char *argv[],
-	message* msg);
-char* pack_message(message* msg);
-message* receive_message_complete(int sockfd);
-message* unpack_message(char* msg);
 void free_message(message* msg);
+
+int send_message(char *hostname, int port, message* msg);
+int send_message_all(int nhosts, int cur_host_id, char *argv[], message* msg);
+char* pack_message(message* msg);
+
+message* receive_message(int sockfd);
+message* unpack_message(char* msg);
 
 #endif // MESSAGE_TOOLS_H
