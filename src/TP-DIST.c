@@ -213,16 +213,17 @@ void main_loop(int s_listen, int nhosts, char *argv[]) {
                 recipient = msg->host_id;
                 send_message_complete(argv[2 + recipient], atoi(argv[1]) + recipient, response);
                 printf("host(%d) - Clock(%d) - Sent response (to %d)\n", cur_host_id, logical_clock, recipient);
+                free(response);
             }
             else if (strcmp(msg->str, "response") == 0) {
                 responses++;
+                free_message(msg);
             }
             else if (strcmp(msg->str, "free") == 0) {
                 pop(&queue);
                 print_messages_linked_list(queue); // FIXME DEBUG ONLY
+                free_message(msg);
             }
-
-            free_message(msg);
         }
 
         if (queue != NULL &&
@@ -233,7 +234,8 @@ void main_loop(int s_listen, int nhosts, char *argv[]) {
             state = STATE_CRITICAL_SECTION;
             logical_clock++;
 
-            printf("Host(%d) - Clock(%d) - Begin critical section\n", cur_host_id, logical_clock);
+            printf("Host(%d) - Clock(%d) - Begin critical section\n",
+                cur_host_id, logical_clock);
         }
 
         // Choose randomly whether the current host must change state

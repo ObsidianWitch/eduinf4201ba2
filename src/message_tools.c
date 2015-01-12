@@ -100,6 +100,6 @@ message* unpack_message(char* msg) {
 }
 
 void free_message(message* msg) {
-	//free(msg->str);
-	//free(msg);
+	free(msg->str);
+	free(msg);
 }
