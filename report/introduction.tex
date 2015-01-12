@@ -1,18 +1,23 @@
 \section{Introduction}
-% TODO
+L'objectif de ce TP est d'implémenter l'algorithme d'exclusion mutuelle de Lamport étudié en cours. Une base nous a été fournie à partir de laquelle nous allons effectué l'implémentation. Des structures de message et de liste chaînée seront notamment nécessaire afin de mettre en place l'algorithme.
 
 \subsection{Arborescence}
 \noindent Ci-dessous l'arborescence de fichiers du TP avec pour certains d'entre-eux une brève description.
 
+\begin{framed}
 \dirtree{%
-.1 src.
-.2 host\_tool.c/.h - % TODO
-.2 message_linked_list.c/.h - % TODO
-.2 message.c/.h - % TODO
-.2 socket_tools.c/.H - % TODO
-.2 TP-DIST-CL.c
-.2 TP-DIST.c
+.1 TP\_Dist.
+.2 src.
+.3 host\_tool.c/.h - Fonctions fournies avec le squelette du programme, permettent entre autre d'envoyer/recevoir des messages de synchronisation et de récupérer l'id de l'hôte courant..
+.3 message\_linked\_list.c/.h - Structure de liste chaînée pour les messages et fonctions permettant de manipuler celle-ci (comparaison, ajout, retrait de noeuds)..
+.3 message.c/.h - Structure de message et fonctions permettant de manipuler celle-ci (création, envoi, réception)..
+.3 socket\_tools.c/.h - Outils permettant de faciliter la manipulation de sockets (initialisation d'une socket serveur/cliente, envoi et réception de données)..
+.3 TP-DIST-CL.c.
+.3 TP-DIST.c.
+.2 Vagrantfile.
+.2 Vagrantprov.sh.
 }
+\end{framed}
 
 \subsection{Instructions de compilation}
 Ci-dessous les instructions pour compiler l'ensemble des exercices. L'utilitaire cmake \cite{cite:cmake} est nécessaire afin de créer le Makefile.
