@@ -12,9 +12,8 @@ node* create_node(message *msg) {
 }
 
 void free_node(node* n) {
-    /* TODO
     free_message(n->msg);
-    free(n);*/
+    free(n);
 }
 
 void free_linked_list(node* head) {

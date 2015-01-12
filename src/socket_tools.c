@@ -7,7 +7,7 @@
 #include <stdlib.h>
 #include "socket_tools.h"
 
-#define BUFFER_LEN 256
+#define BUFFER_LEN 32
 
 /**
  * Initializes a stream socket used as a server.

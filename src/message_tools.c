@@ -4,7 +4,7 @@
 #include "message_tools.h"
 #include "socket_tools.h"
 
-#define BUFFER_LEN 64
+#define BUFFER_LEN 32
 
 /**
  * Create a message from the given parameters.
