@@ -8,6 +8,8 @@ include_directories(src)
 
 add_executable(TP-DIST.out
     src/TP-DIST.c
+    src/host_tools.c
+    src/host_tools.h
     src/socket_tools.c
     src/socket_tools.h
     src/message_tools.c
