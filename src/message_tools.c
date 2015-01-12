@@ -33,7 +33,7 @@ message* create_message(int host_id, int timestamp, const char* str) {
  * @param sockfd sending connected socket
  * @param hostname
  * @param port
- * @param msg message to send
+ * @param msg Message to send
  * @return Returns 0 on success, and -1 otherwise.
  */
 int send_message_complete(char *hostname, int port, message* msg) {
@@ -48,6 +48,32 @@ int send_message_complete(char *hostname, int port, message* msg) {
 	status = send_complete_host(hostname, port, packed_message,
 		strlen(packed_message));
 	free(packed_message);
+
+	return status;
+}
+
+/**
+ * Send a complete message to all hosts (current host excluded).
+ *
+ * @param nhosts Number of hosts
+ * @param cur_host_id Current host's id
+ * @param argv Arguments given to the program, contain the hostnames
+ * @param msg Message to send
+ * @return 0 on success, -1 if one or more messages could not be sent
+ * successfully.
+ */
+int send_message_complete_all(int nhosts, int cur_host_id, char *argv[],
+	message* msg)
+{
+	int i, status = 0;
+
+    for (i = 0 ; i < nhosts ; i++) {
+        if (i != cur_host_id) {
+            status += send_message_complete(
+				argv[2 + i], atoi(argv[1]) + i, msg
+			);
+        }
+    }
 
 	return status;
 }

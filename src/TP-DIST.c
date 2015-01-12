@@ -245,42 +245,37 @@ void main_loop(int s_listen, int nhosts, char *argv[]) {
         if ((rand() % nhosts) == cur_host_id) {
             if (state == STATE_NOTHING) {
                 message *request_msg;
-                int i;
 
-                state = STATE_WAITING;
                 logical_clock++;
 
                 request_msg = create_message(cur_host_id, logical_clock, "request");
                 insert_message(&queue, request_msg);
 
-                for (i = 0 ; i < nhosts ; i++) {
-                    if (i != cur_host_id) {
-                        send_message_complete(argv[2 + i], atoi(argv[1]) + i, request_msg);
-                    }
-                }
+                send_message_complete_all(nhosts, cur_host_id, argv, request_msg);
 
-                printf("host(%d) - Clock(%d) - Sent request\n", cur_host_id, logical_clock);
+                printf("host(%d) - Clock(%d) - Sent request\n",
+                    cur_host_id, logical_clock);
                 print_messages_linked_list(queue); // FIXME DEBUG ONLY
+
+                state = STATE_WAITING;
             }
             else if (state == STATE_CRITICAL_SECTION) {
                 message *free_msg;
-                int i;
 
-                state = STATE_NOTHING;
+
                 logical_clock++;
 
                 free_msg = create_message(cur_host_id, logical_clock, "free");
-                for (i = 0 ; i < nhosts ; i++) {
-                    if (i != cur_host_id) {
-                        send_message_complete(argv[2 + i], atoi(argv[1]) + i, free_msg);
-                    }
-                }
+                send_message_complete_all(nhosts, cur_host_id, argv, free_msg);
                 free_message(free_msg);
 
                 pop(&queue);
 
-                printf("Host(%d) - Clock(%d) - End critical section\n", cur_host_id, logical_clock);
+                printf("Host(%d) - Clock(%d) - End critical section\n",
+                    cur_host_id, logical_clock);
                 print_messages_linked_list(queue); // FIXME DEBUG ONLY
+
+                state = STATE_NOTHING;
             }
         }
     }
