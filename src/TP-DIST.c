@@ -192,4 +192,6 @@ void main_loop(int s_listen, int nhosts, char *argv[]) {
             state = STATE_NOTHING;
         }
     }
+
+    free_linked_list(&queue);
 }

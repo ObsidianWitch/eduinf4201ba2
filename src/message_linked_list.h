@@ -10,7 +10,7 @@ typedef struct node {
 
 node* create_node(message *msg);
 void free_node(node* n);
-void free_linked_list(node* head);
+void free_linked_list(node** head);
 int nodecmp(const node* n1, const node* n2);
 void insert_message(node** linked_list, message* msg);
 void pop(node** linked_list);

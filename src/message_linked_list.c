@@ -16,14 +16,16 @@ void free_node(node* n) {
     free(n);
 }
 
-void free_linked_list(node* head) {
-    node* cur_node = head;
+void free_linked_list(node** head) {
+    node* cur_node = *head;
 
     while (cur_node != NULL) {
         node* tmp = cur_node->next;
-        free(cur_node);
+        free_node(cur_node);
         cur_node = tmp;
     }
+
+    *head = NULL;
 }
 
 /*
