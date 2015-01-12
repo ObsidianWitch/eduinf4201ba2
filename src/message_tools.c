@@ -26,6 +26,7 @@ int send_message_complete(char *hostname, int port, message* msg) {
 
 	status = send_complete_host(hostname, port, packed_message,
 		strlen(packed_message));
+	free(packed_message);
 
 	return status;
 }
@@ -70,6 +71,7 @@ message* receive_message_complete(int sockfd) {
 	}
 
 	unpacked_message = unpack_message(recv_msg);
+	free(recv_msg);
 
 	return unpacked_message;
 }

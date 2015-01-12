@@ -13,7 +13,7 @@ node* create_node(message *msg) {
 
 void free_node(node* n) {
     /* TODO
-    free(n->msg);
+    free_message(n->msg);
     free(n);*/
 }
 
