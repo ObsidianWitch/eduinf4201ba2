@@ -1,0 +1,111 @@
+\documentclass[a4paper, frenchb, 11pt]{article}
+
+\usepackage[top=2cm, bottom=2cm, left=2cm, right=2cm]{geometry}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{babel}
+
+\usepackage{multicol}
+\setlength{\columnseprule}{1pt} % separation line between columns
+
+\usepackage{hyperref}
+\hypersetup{
+	colorlinks=true,	% false: boxed links; true: colored links
+	linkcolor=black,	% color of internal links
+	urlcolor=blue,		% color of external links
+	citecolor=blue
+}
+
+\usepackage{graphicx}	% import graphics
+\usepackage{wrapfig}	% wrap text around figures
+\usepackage{subcaption}
+
+\usepackage{dirtree} % file tree
+% Colors
+\usepackage[usenames,dvipsnames]{xcolor}
+
+% Colored frame
+\usepackage{mdframed}
+\usepackage{framed}
+\definecolor{shadecolor}{rgb}{0.96,0.96,0.96}
+\definecolor{TFFrameColor}{rgb}{0.96,0.96,0.96}
+\definecolor{TFTitleColor}{rgb}{0.00,0.00,0.00}
+\definecolor{lightred}{rgb}{1,0.96,0.96}
+\definecolor{darkred}{rgb}{0.85,0.33,0.31}
+\definecolor{lightblue}{HTML}{EBF5FA}
+\definecolor{lightblue2}{HTML}{E3F2FA}
+\definecolor{darkblue}{HTML}{D2DCE1}
+\definecolor{hintbg}{HTML}{FFFAE6}
+\definecolor{hintborder}{HTML}{FAE6BE}
+
+% Redefine leftbar envvironment
+\newlength{\leftbarwidth}
+\setlength{\leftbarwidth}{1pt}
+\newlength{\leftbarsep}
+\setlength{\leftbarsep}{10pt}
+
+\newcommand*{\leftbarcolorcmd}{\color{leftbarcolor}} % as a command to be more flexible
+\colorlet{leftbarcolor}{gray}
+
+\renewenvironment{leftbar}{%
+    \def\FrameCommand{{\leftbarcolorcmd{\vrule width \leftbarwidth\relax\hspace {\leftbarsep}}}}%
+    \MakeFramed {\advance \hsize -\width \FrameRestore }%
+}{%
+    \endMakeFramed
+}
+
+% Code listings
+\usepackage{listings}
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{steelblue}{rgb}{0.16,0.37,0.58}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+\definecolor{blue}{rgb}{0,0,0.7}
+\lstset{
+	language=C,
+	basicstyle=\scriptsize,
+	numbers=left,                   % where to put the line-numbers
+  	numberstyle=\tiny\color{gray},
+	commentstyle=\color{steelblue},
+	stringstyle=\color{BrickRed},
+	backgroundcolor=\color{shadecolor},
+    keywordstyle=\color{OliveGreen},
+	frame=single,                   % adds a frame around the code
+ 	rulecolor=\color{black},
+	emph={},
+	emphstyle=\color{mauve},
+	morekeywords=[2]{obside@obsideb},
+	keywordstyle={\color{black}},
+	keywordstyle=[2]{\color{dkgreen}},
+	showstringspaces=false,
+  	tabsize=4,
+	moredelim=[is][\small\ttfamily]{/!}{!/},
+	breaklines=true
+}
+
+% Title page
+\title{ % TODO modify title
+	\textbf{INF-4201B - TP Exclusion mutuelle dans les systèmes répartis}\\
+}
+\date{\today}
+
+\begin{document}
+\maketitle
+\newpage
+
+\tableofcontents
+\newpage
+
+\include{introduction}
+\newpage
+
+% TODO
+
+\renewcommand\refname{Ressources utilisées}
+\begin{thebibliography}{5} % TODO
+\bibitem{cite:vagrant} \emph{Vagrant}, \href{https://www.vagrantup.com/}{https://www.vagrantup.com/}
+
+\bibitem{cite:beej} \emph{Beej's Guide to Network Programming}, Brian Hall, \href{http://beej.us/guide/bgnet/}{http://beej.us/guide/bgnet/}
+\end{thebibliography}
+
+\end{document}
