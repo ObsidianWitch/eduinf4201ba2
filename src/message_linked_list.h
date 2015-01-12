@@ -1,7 +1,7 @@
 #ifndef MESSAGE_LINKED_LIST_H
 #define MESSAGE_LINKED_LIST_H
 
-#include "message_tools.h"
+#include "message.h"
 
 typedef struct node {
     message* msg;

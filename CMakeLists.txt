@@ -12,8 +12,8 @@ add_executable(TP-DIST.out
     src/host_tools.h
     src/socket_tools.c
     src/socket_tools.h
-    src/message_tools.c
-    src/message_tools.h
+    src/message.c
+    src/message.h
     src/message_linked_list.c
     src/message_linked_list.h
 )

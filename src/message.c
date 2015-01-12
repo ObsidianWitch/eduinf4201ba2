@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include "message_tools.h"
+#include "message.h"
 #include "socket_tools.h"
 
 #define BUFFER_LEN 32

@@ -1,5 +1,5 @@
-#ifndef MESSAGE_TOOLS_H
-#define MESSAGE_TOOLS_H
+#ifndef MESSAGE_H
+#define MESSAGE_H
 
 typedef struct message {
 	int host_id;
@@ -17,4 +17,4 @@ char* pack_message(message* msg);
 message* receive_message(int sockfd);
 message* unpack_message(char* msg);
 
-#endif // MESSAGE_TOOLS_H
+#endif // MESSAGE_H

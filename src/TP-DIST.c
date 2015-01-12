@@ -47,7 +47,7 @@ necessaire
 #include <string.h>
 #include "host_tools.h"
 #include "socket_tools.h"
-#include "message_tools.h"
+#include "message.h"
 #include "message_linked_list.h"
 
 #define STATE_NOTHING 0
