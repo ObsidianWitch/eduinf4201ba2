@@ -150,7 +150,10 @@ void main_loop(int s_listen, int nhosts, char *argv[]) {
         }
 
         // -- State update --
-        try_request_cs(&state, &logical_clock, nhosts, argv, &queue);
+        // Choose randomly whether the current host must change state
+        if ((rand() % nhosts) == cur_host_id) {
+            try_request_cs(&state, &logical_clock, nhosts, argv, &queue);
+        }
         try_enter_cs(&state, &responses, &logical_clock, nhosts, queue,
             cur_host_id);
         try_leave_cs(&state, &logical_clock, nhosts, argv, &queue);
@@ -192,24 +195,20 @@ void try_request_cs(int* state, int* logical_clock, int nhosts, char* argv[],
 {
     if (*state == STATE_NOTHING) {
         int cur_host_id = get_host_pos(nhosts, argv);
+        message *request_msg;
 
-        // Choose randomly whether the current host must change state
-        if ((rand() % nhosts) == cur_host_id) {
-            message *request_msg;
+        (*logical_clock)++;
 
-            (*logical_clock)++;
+        request_msg = create_message(cur_host_id, *logical_clock, "request");
+        insert_message(queue, request_msg);
 
-            request_msg = create_message(cur_host_id, *logical_clock, "request");
-            insert_message(queue, request_msg);
+        send_message_all(nhosts, cur_host_id, argv, request_msg);
 
-            send_message_all(nhosts, cur_host_id, argv, request_msg);
+        printf("host(%d) - Clock(%d) - Sent request\n",
+            cur_host_id, *logical_clock);
+        print_messages_linked_list(*queue);
 
-            printf("host(%d) - Clock(%d) - Sent request\n",
-                cur_host_id, *logical_clock);
-            print_messages_linked_list(*queue);
-
-            *state = STATE_WAITING;
-        }
+        *state = STATE_WAITING;
     }
 }
 
