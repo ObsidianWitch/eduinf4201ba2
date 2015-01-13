@@ -5,7 +5,14 @@
 % TODO parler des estampilles et de l'horloge scalaire, et quand est-ce que cette dernière est modifiée (+1 après un event local, +1 avant d'envoyer un message, 1 + max(hl, l) après avoir reçu un message)
 
 \subsection{Initialisation}
-% TODO
+Avant d'entrer dans la boucle principale, les différentes variables servant à l'algorithme doivent être initialisées.
+
+\begin{lstlisting}
+int logical_clock = 0; // horloge logique scalaire
+int responses = 0; // compteur de réponses reçues après envoi d'une requête
+int state = STATE_NOTHING; // état courant du programme
+node* queue = NULL; // liste chaînée permettant de stocker les requêtes de manière triée
+\end{lstlisting}
 
 \subsection{Récupération d'un message \& traitement}
 % TODO
@@ -51,3 +58,5 @@ if ((rand() % nhosts) == cur_host_id) {
 }
 \end{lstlisting}
 \end{framehint}
+
+% TODO insérer code de try_enter_cs, try_request_cs et try_leave_cs
