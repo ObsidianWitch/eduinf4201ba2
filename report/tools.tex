@@ -14,7 +14,7 @@ typedef struct message {
 Les fonctions \textbf{create\_message()} et \textbf{free\_message()} permettent respectivement de créer et libérer un message. La création de message fait notamment une copie de la chaîne de caractères passée en paramètre afin de s'assurer que l'on puisse la libérer par la suite.
 
 \begin{framewarning}
-Si la copie n'avait pas été effectuée, des problèmes auraient pu se produire en passant en paramètre une chaîne provenant de la stack, puis en libérant le message à l'aide de \emph{free\_message()}.
+Si la copie n'avait pas été effectuée, des problèmes auraient pu se produire en passant en paramètre une chaîne provenant de la stack, puis en libérant le message à l'aide de \textbf{free\_message()}.
 \end{framewarning}
 
 \begin{lstlisting}
