@@ -15,7 +15,58 @@ node* queue = NULL; // liste chaînée permettant de stocker les requêtes de ma
 \end{lstlisting}
 
 \subsection{Récupération d'un message \& traitement}
-% TODO
+La première étape d'une itération dans la boucle principale est de récupérer un message d'un des hôtes et de le traiter.  Une connexion entrante est d'abord acceptée avec \textbf{accept()} (configuré en non bloquant précédemment). Le message est ensuite récupéré à l'aide de \textbf{receive\_message()}. L'horloge logique est ensuite mise à jour à l'aide de l'estampille du message reçu ($HL_i = 1 + max(HL_i, EL_m)$). La chaîne de caractères contenue dans le message reçu détermine ensuite quelle action doit être effectuée :
+
+\begin{description}
+    \item[request] Màj de l'horloge ($+1$), et envoi d'une réponse à l'hôte ayant envoyé la requête.
+    \item[response] Incrémentation du compteur de réponses.
+    \item[free] Retrait du premier élément de la file.
+\end{description}
+
+\begin{lstlisting}[caption={Récupération d'un message \& traitement}]
+int s_client = accept(s_listen, NULL, NULL);
+if (s_client > 0) {
+    message *msg = receive_message(s_client);
+    close(s_client);
+    if (msg == NULL) {
+        exit(EXIT_FAILURE);
+    }
+
+    logical_clock = 1 + max(logical_clock, msg->timestamp);
+
+    printf("Host(%d) - Clock(%d) - Received (from %d) : %s\n",
+        cur_host_id, logical_clock, msg->host_id, msg->str
+    );
+
+    if (strcmp(msg->str, "request") == 0) {
+        message* msg_response;
+        int recipient = msg->host_id;
+
+        insert_message(&queue, msg);
+        logical_clock++;
+        print_messages_linked_list(queue);
+
+        msg_response = create_message(
+            cur_host_id, logical_clock, "response"
+        );
+
+        send_message(argv[2 + recipient], atoi(argv[1]) + recipient,
+            msg_response);
+        printf("host(%d) - Clock(%d) - Sent response (to %d)\n",
+            cur_host_id, logical_clock, recipient);
+        free_message(msg_response);
+    }
+    else if (strcmp(msg->str, "response") == 0) {
+        responses++;
+        free_message(msg);
+    }
+    else if (strcmp(msg->str, "free") == 0) {
+        pop(&queue);
+        print_messages_linked_list(queue);
+        free_message(msg);
+    }
+}
+\end{lstlisting}
 
 \subsection{Mise à jour de l'état}
 Une fois le message reçu est traité, nous souhaitons changer l'état dans lequel se trouve le programme. Les trois états possibles sont les suivantes :\\
