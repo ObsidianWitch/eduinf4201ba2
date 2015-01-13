@@ -184,3 +184,7 @@ void try_leave_cs(int* state, int* logical_clock, int nhosts, char* argv[],
     }
 }
 \end{lstlisting}
+
+\begin{framehint}
+Un délai peut être ajouté après l'entrée dans la section critique (décommenter ligne \emph{sleep(2)}) afin que l'affichage ne défile pas trop rapidement et pour vérifier plus facilement que le programme se comporte correctement.
+\end{framehint}
