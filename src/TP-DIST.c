@@ -57,6 +57,12 @@
 
 int max(int a, int b);
 void main_loop(int s_listen, int nhosts, char *argv[]);
+void try_enter_cs(int* state, int* responses, int* logical_clock, int nhosts,
+    node* queue, int cur_host_id);
+void try_request_cs(int* state, int* logical_clock, int nhosts, char* argv[],
+    node** queue);
+void try_leave_cs(int* state, int* logical_clock, int nhosts, char* argv[],
+    node** queue);
 
 int max(int a, int b) {
     return (a > b) ? a : b;
@@ -144,58 +150,91 @@ void main_loop(int s_listen, int nhosts, char *argv[]) {
         }
 
         // -- State update --
-        // Request critical section
-        if (state == STATE_NOTHING) {
-            // Choose randomly whether the current host must change state
-            if ((rand() % nhosts) == cur_host_id) {
-                message *request_msg;
-
-                logical_clock++;
-
-                request_msg = create_message(cur_host_id, logical_clock, "request");
-                insert_message(&queue, request_msg);
-
-                send_message_all(nhosts, cur_host_id, argv, request_msg);
-
-                printf("host(%d) - Clock(%d) - Sent request\n",
-                    cur_host_id, logical_clock);
-                print_messages_linked_list(queue);
-
-                state = STATE_WAITING;
-            }
-        }
-        // Enter critical section
-        else if (state == STATE_WAITING &&
-            queue->msg->host_id == cur_host_id &&
-            responses == nhosts - 1)
-        {
-            responses = 0;
-            state = STATE_CRITICAL_SECTION;
-            logical_clock++;
-
-            printf("Host(%d) - Clock(%d) - Begin critical section\n",
-                cur_host_id, logical_clock);
-        }
-
-        // Leave critical section
-        if (state == STATE_CRITICAL_SECTION) {
-            message *free_msg;
-
-            logical_clock++;
-
-            free_msg = create_message(cur_host_id, logical_clock, "free");
-            send_message_all(nhosts, cur_host_id, argv, free_msg);
-            free_message(free_msg);
-
-            pop(&queue);
-
-            printf("Host(%d) - Clock(%d) - End critical section\n",
-                cur_host_id, logical_clock);
-            print_messages_linked_list(queue);
-
-            state = STATE_NOTHING;
-        }
+        try_request_cs(&state, &logical_clock, nhosts, argv, &queue);
+        try_enter_cs(&state, &responses, &logical_clock, nhosts, queue,
+            cur_host_id);
+        try_leave_cs(&state, &logical_clock, nhosts, argv, &queue);
     }
 
     free_linked_list(&queue);
+}
+
+/**
+ * Enters the critical section if the following requirements are met :
+ * - A request has been sent to other hosts (STATE_WAITING)
+ * - The queue's first request is owned by the current host
+ * - All hosts gave a response to the current host
+ */
+void try_enter_cs(int* state, int* responses, int* logical_clock, int nhosts,
+    node* queue, int cur_host_id)
+{
+    if (*state == STATE_WAITING &&
+        queue->msg->host_id == cur_host_id &&
+        *responses == nhosts - 1)
+    {
+        *responses = 0;
+        *state = STATE_CRITICAL_SECTION;
+        (*logical_clock)++;
+
+        printf("Host(%d) - Clock(%d) - Begin critical section\n",
+            cur_host_id, *logical_clock);
+    }
+}
+
+/**
+ * Sends a critical section request to all hosts if nothing is currently
+ * happening (STATE_NOTHING).
+ */
+void try_request_cs(int* state, int* logical_clock, int nhosts, char* argv[],
+    node** queue)
+{
+
+    if (*state == STATE_NOTHING) {
+        int cur_host_id = get_host_pos(nhosts, argv);
+
+        // Choose randomly whether the current host must change state
+        if ((rand() % nhosts) == cur_host_id) {
+            message *request_msg;
+
+            (*logical_clock)++;
+
+            request_msg = create_message(cur_host_id, *logical_clock, "request");
+            insert_message(queue, request_msg);
+
+            send_message_all(nhosts, cur_host_id, argv, request_msg);
+
+            printf("host(%d) - Clock(%d) - Sent request\n",
+                cur_host_id, *logical_clock);
+            print_messages_linked_list(*queue);
+
+            *state = STATE_WAITING;
+        }
+    }
+}
+
+/**
+ * Leaves the critical section is in the state STATE_CRITICAL_SECTION. Sends
+ * liberation messages to all hosts an removes the first request from the queue.
+ */
+void try_leave_cs(int* state, int* logical_clock, int nhosts, char* argv[],
+    node** queue)
+{
+    if (*state == STATE_CRITICAL_SECTION) {
+        int cur_host_id = get_host_pos(nhosts, argv);
+        message *free_msg;
+
+        (*logical_clock)++;
+
+        free_msg = create_message(cur_host_id, *logical_clock, "free");
+        send_message_all(nhosts, cur_host_id, argv, free_msg);
+        free_message(free_msg);
+
+        pop(queue);
+
+        printf("Host(%d) - Clock(%d) - End critical section\n",
+            cur_host_id, *logical_clock);
+        print_messages_linked_list(*queue);
+
+        *state = STATE_NOTHING;
+    }
 }
