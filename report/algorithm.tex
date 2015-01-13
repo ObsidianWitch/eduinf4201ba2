@@ -1,4 +1,53 @@
 \section{Algorithme}
-% TODO rappeler brièvement le principe
+\subsection{Présentation de l'algorithme}
+% TODO rappeler brièvement le principe (notamment: lorsqu'un hôte entre en section critique, les autres ne doivent pas y rentrer).
 
-% TODO décrire le code de la boucle principale
+% TODO parler des estampilles et de l'horloge scalaire, et quand est-ce que cette dernière est modifiée (+1 après un event local, +1 avant d'envoyer un message, 1 + max(hl, l) après avoir reçu un message)
+
+\subsection{Initialisation}
+% TODO
+
+\subsection{Récupération d'un message \& traitement}
+% TODO
+
+\subsection{Mise à jour de l'état}
+Une fois le message reçu est traité, nous souhaitons changer l'état dans lequel se trouve le programme. Les trois états possibles sont les suivantes :\\
+
+\begin{description}
+    \item[STATE\_NOTHING] Le programme n'a pas d'action en cours.
+    \item[STATE\_WAITING] Une requête a été envoyée aux autres hôtes, le programme est en attente de réponse de ces derniers, et la requête de l'hôte courant doit être la première dans la file.
+    \item[STATE\_CRITICAL\_SECTION] Le programme est en cours d'exécution de sa section critique.
+\end{description}
+\
+
+Trois opérations liées à la section critique peuvent être effectuées. celles-ci sont effectués à la suite (voir listing \ref{lst:rand1}) pour essayer de mettre à jour l'état du programme.\\
+
+\begin{description}
+    \item[try\_request\_cs()] envoie des requêtes pour entrer en section critique aux autres hôtes s'il l'hôte actuel n'en a pas déjà envoyé (\emph{STATE\_NOTHING}). La requête est également inséré dans la file.
+
+    \item[try\_enter\_cs()] entre en section critique si les conditions requises sont remplies : une requête a été envoyée aux autres hôtes (\emph{STATE\_WAITING}), la première requête de la file appartient à l'hôte courant, et tous les autres hôtes ont envoyé une réponse.
+
+    \item[try\_leave\_cs()] Sort de la section critique si le programme y est entré (\emph{STATE\_CRITICAL\_ SECTION}).
+\end{description}
+
+\begin{framehint}
+\textbf{try\_enter\_cs()} et \textbf{try\_leave\_cs()} ont été placés à la suite, ce qui résultera toujours en \emph{Begin critical section} suivi de \emph{End critical section} tout de suite après. Seul l'appel \textbf{try\_request\_cs()} est actuellement aléatoire (voir listing \ref{lst:rand1}), cependant les trois appels peuvent être rendus aléatoires (voir listing \ref{lst:rand2}) afin de tester plus en détail le bon fonctionnement de l'implémentation.\\
+
+\begin{lstlisting}[label={lst:rand1}, caption={Changement d'état aléatoire 1}, numbers=none]
+if ((rand() % nhosts) == cur_host_id) {
+    try_request_cs(&state, &logical_clock, nhosts, argv, &queue);
+}
+try_enter_cs(&state, &responses, &logical_clock, nhosts, queue,
+    cur_host_id);
+try_leave_cs(&state, &logical_clock, nhosts, argv, &queue);
+\end{lstlisting}
+
+\begin{lstlisting}[label={lst:rand2}, caption={Changement d'état aléatoire 2}, numbers=none]
+if ((rand() % nhosts) == cur_host_id) {
+    try_leave_cs(&state, &logical_clock, nhosts, argv, &queue);
+    try_request_cs(&state, &logical_clock, nhosts, argv, &queue);
+    try_enter_cs(&state, &responses, &logical_clock, nhosts, queue,
+        cur_host_id);
+}
+\end{lstlisting}
+\end{framehint}
