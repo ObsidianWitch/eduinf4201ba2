@@ -1,8 +1,18 @@
 \section{Algorithme}
 \subsection{Présentation de l'algorithme}
-% TODO rappeler brièvement le principe (notamment: lorsqu'un hôte entre en section critique, les autres ne doivent pas y rentrer).
+L'algorithme que nous souhaitons implémenter, l'algorithme d'exclusion mutuelle en distribué de Lamport, a pour but d'exécuter une section du code de manière exclusive entre différents hôtes connectés entre eux (section critique).\\
 
-% TODO parler des estampilles et de l'horloge scalaire, et quand est-ce que cette dernière est modifiée (+1 après un event local, +1 avant d'envoyer un message, 1 + max(hl, l) après avoir reçu un message)
+Le principe de l'algorithme se base sur la présence d'une horloge, celle que nous utilisons est une horloge logique scalaire. Les événements suivants déterminent de quelle manière l'horloge va être mise à jour :
+
+\begin{description}
+    \item[événement local] $HL_i++$
+    \item[envoi message] $HL_i++$ et $EL_m = HL_i$
+    \item[réception message] $HL_i = 1 + max(HL_i, EL_m)$
+\end{description}
+
+\noindent \textbf{N.B.} $HL_i$ horloge logique de l'hôte $i$, et $EL_m$ estampille du message $m$.\\
+
+Lorsqu'un des hôtes souhaite entrer en section critique, celui-ci ajoute sa requête dans une file et l'envoi à tous les autres hôtes. Il attend ensuite la réponse de ces derniers. Il ne peut entrer en section critique que si tous les hôtes ont répondu, et si sa requête est la première dans la file. Une fois la section critique exécutée l'hôte actuel retire sa requête de la file, et un message de libération est envoyé à tous les autres afin de les prévenir d'également retirer la première requête de leur file.
 
 \subsection{Initialisation}
 Avant d'entrer dans la boucle principale, les différentes variables servant à l'algorithme doivent être initialisées.
