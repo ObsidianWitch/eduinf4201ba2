@@ -110,4 +110,69 @@ if ((rand() % nhosts) == cur_host_id) {
 \end{lstlisting}
 \end{framehint}
 
+\begin{lstlisting}[caption={Fonctions de mise à jour d'état}]
+void try_enter_cs(int* state, int* responses, int* logical_clock, int nhosts,
+    node* queue, int cur_host_id)
+{
+    if (*state == STATE_WAITING &&
+        queue->msg->host_id == cur_host_id &&
+        *responses == nhosts - 1)
+    {
+        *responses = 0;
+        *state = STATE_CRITICAL_SECTION;
+        (*logical_clock)++;
+
+        printf("Host(%d) - Clock(%d) - Begin critical section\n",
+            cur_host_id, *logical_clock);
+
+        //sleep(2); // DEBUG ONLY
+    }
+}
+
+void try_request_cs(int* state, int* logical_clock, int nhosts, char* argv[],
+    node** queue)
+{
+    if (*state == STATE_NOTHING) {
+        int cur_host_id = get_host_pos(nhosts, argv);
+        message *request_msg;
+
+        (*logical_clock)++;
+
+        request_msg = create_message(cur_host_id, *logical_clock, "request");
+        insert_message(queue, request_msg);
+
+        send_message_all(nhosts, cur_host_id, argv, request_msg);
+
+        printf("host(%d) - Clock(%d) - Sent request\n",
+            cur_host_id, *logical_clock);
+        print_messages_linked_list(*queue);
+
+        *state = STATE_WAITING;
+    }
+}
+
+void try_leave_cs(int* state, int* logical_clock, int nhosts, char* argv[],
+    node** queue)
+{
+    if (*state == STATE_CRITICAL_SECTION) {
+        int cur_host_id = get_host_pos(nhosts, argv);
+        message *free_msg;
+
+        (*logical_clock)++;
+
+        free_msg = create_message(cur_host_id, *logical_clock, "free");
+        send_message_all(nhosts, cur_host_id, argv, free_msg);
+        free_message(free_msg);
+
+        pop(queue);
+
+        printf("Host(%d) - Clock(%d) - End critical section\n",
+            cur_host_id, *logical_clock);
+        print_messages_linked_list(*queue);
+
+        *state = STATE_NOTHING;
+    }
+}
+\end{lstlisting}
+
 % TODO insérer code de try_enter_cs, try_request_cs et try_leave_cs
