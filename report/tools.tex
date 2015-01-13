@@ -1,6 +1,82 @@
 \section{Outils nécessaires à l'algorithme}
 \subsection{Messages}
-% TODO
+Une structure de message a été définie afin de faire communiquer les différents hôtes du système distribué. Un message est caractérisé par l'id de l'hôte (\emph{host\_id}) duquel il provient, son estampille (\emph{timestamp}) ainsi que la chaîne de caractères du message (\emph{str}). Cette structure ainsi que les fonctions qui lui sont liées sont définies dans \emph{messages.c/.h}.\\
+
+\begin{lstlisting}
+typedef struct message {
+	int host_id;
+	int timestamp;
+	char* str;
+} message;
+\end{lstlisting}
+\
+
+Les fonctions \emph{create\_message()} et \emph{free\_message()} permettent respectivement de créer et libérer un message. La création de message fait notamment une copie de la chaîne de caractères passée en paramètre afin de s'assurer que l'on puisse la libérer par la suite.
+
+\begin{framewarning}
+Si la copie n'avait pas été effectuée, des problèmes auraient pu se produire en passant en paramètre une chaîne provenant de la stack, puis en libérant le message à l'aide de \emph{free\_message()}.
+\end{framewarning}
+
+\begin{lstlisting}
+message* create_message(int host_id, int timestamp, const char* str) {
+	message* msg = malloc(sizeof(message));
+
+	msg->host_id = host_id;
+	msg->timestamp = timestamp;
+	msg->str = malloc(strlen(str) + 1);
+	strcpy(msg->str, str);
+
+	return msg;
+}
+\end{lstlisting}
+\
+
+La fonction \emph{send\_message()} se contente de transformer un message en une chaîne de caractères à l'aide de \emph{pack\_message()}. Cette chaîne de caractères est constitué de tous les champs du message séparés par des tirets. Une fois cette étape effectuée, le message est envoyé avec \emph{send\_complete\_host()} défini dans \emph{socket\_tools.c/.h}.\\
+
+\begin{lstlisting}
+char* pack_message(message* msg) {
+	char* buf = malloc(BUFFER_LEN);
+
+	int status = snprintf(buf, BUFFER_LEN,
+		"%d - %d - %s",
+		msg->host_id,
+		msg->timestamp,
+		msg->str
+	);
+
+	if (status == 0) {
+		free(buf);
+		return NULL;
+	}
+
+	return buf;
+}
+\end{lstlisting}
+\
+
+La réception d'un message effectue l'inverse, une chaîne de caractères est tout d'abord reçu à l'aide de \emph{recv\_complete()}, puis celle-ci est parsée avec \emph{unpack\_message()} afin de la transformer en message.\\
+
+\begin{lstlisting}
+message* unpack_message(char* msg) {
+	message* unpacked_message = malloc(sizeof(message));
+	int host_id, timestamp, status;
+	char* buf = malloc(BUFFER_LEN);
+
+	status = sscanf(msg, "%d - %d - %s", &host_id, &timestamp, buf);
+	if (status != 3) {
+		return NULL;
+	}
+
+	unpacked_message->host_id = host_id;
+	unpacked_message->timestamp = timestamp;
+	unpacked_message->str = buf;
+
+	return unpacked_message;
+}
+\end{lstlisting}
+\
 
 \subsection{Liste chaînée}
 % TODO
+
+% estampilles identiques possibles -> intrduction d'un ordre total artificiel à l'aide des IDs des hosts
