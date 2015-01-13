@@ -178,6 +178,8 @@ void try_enter_cs(int* state, int* responses, int* logical_clock, int nhosts,
 
         printf("Host(%d) - Clock(%d) - Begin critical section\n",
             cur_host_id, *logical_clock);
+
+        //sleep(2); // DEBUG ONLY
     }
 }
 
@@ -188,7 +190,6 @@ void try_enter_cs(int* state, int* responses, int* logical_clock, int nhosts,
 void try_request_cs(int* state, int* logical_clock, int nhosts, char* argv[],
     node** queue)
 {
-
     if (*state == STATE_NOTHING) {
         int cur_host_id = get_host_pos(nhosts, argv);
 
